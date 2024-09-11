@@ -1,6 +1,0 @@
-2024-08-12 10:43:57,702 - INFO: Device: cuda.
-2024-08-12 10:43:57,702 - INFO: Torch version: 2.0.1+cu117.
-2024-08-12 10:43:57,702 - INFO: Torch.backends.cudnn.benchmark: True.
-2024-08-12 10:43:57,702 - INFO: Model name: Dual_DCNN_LReLu
-2024-08-12 10:43:57,702 - INFO: Seed: 4
-2024-08-12 10:43:57,702 - INFO: 0 patients have been found in the data directory.
