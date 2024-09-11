@@ -1,0 +1,421 @@
+{
+    "root_dir": "/data/bahrdoh/Deep_Learning_Pipeline",
+    "data_dir": "/data/bahrdoh/CT_Model/Test/proton",
+    "models_folder": "models",
+    "optimizers_folder": "optimizers",
+    "data_preproc_folder": "data_preproc",
+    "save_root_folder": "datasets",
+    "cache_folder": "persistent_cache",
+    "stratified_sampling_test_csv": "stratified_sampling_test_manual_94.csv",
+    "stratified_sampling_full_csv": "stratified_sampling_full_manual_94.csv",
+    "train_val_test_patient_ids_json": "train_val_test_patient_ids.json",
+    "results_csv": "results.csv",
+    "results_overview_csv": "results_overview.csv",
+    "i_outputs_csv": "{i}_outputs.csv",
+    "lr_finder_png": "lr_finder.png",
+    "model_txt": "model.txt",
+    "best_model_pth": "best_model.pth",
+    "results_png": "results.png",
+    "optuna_study_name": "optuna_study.pkl",
+    "optuna_sampler_name": "optuna_sampler.pkl",
+    "filename_best_model_pth": "best_model.pth",
+    "exclude_patients_csv": "exclude_patients.csv",
+    "filename_lr_finder_png": "lr_finder.png",
+    "exp_result_txt": "epoch_results.txt",
+    "src_folder": "src",
+    "figures_folder": "figures",
+    "optuna_path_pickles": "pickles",
+    "models_dir": "/data/bahrdoh/Deep_Learning_Pipeline/models",
+    "optimizers_dir": "/data/bahrdoh/Deep_Learning_Pipeline/optimizers",
+    "data_preproc_dir": "/data/bahrdoh/Deep_Learning_Pipeline/data_preproc",
+    "save_root_dir": "/data/bahrdoh/Deep_Learning_Pipeline/datasets",
+    "exp_root_dir": "/data/bahrdoh/Deep_Learning_Pipeline/experiments/test",
+    "exp_dir": "/data/bahrdoh/Deep_Learning_Pipeline/experiments/test/20240620_230300",
+    "exp_src_dir": "/data/bahrdoh/Deep_Learning_Pipeline/experiments/test/20240620_230300/src",
+    "exp_models_dir": "/data/bahrdoh/Deep_Learning_Pipeline/experiments/test/20240620_230300/src/models",
+    "exp_optimizers_dir": "/data/bahrdoh/Deep_Learning_Pipeline/experiments/test/20240620_230300/src/optimizers",
+    "exp_data_preproc_dir": "/data/bahrdoh/Deep_Learning_Pipeline/experiments/test/20240620_230300/src/data_preproc",
+    "exp_figures_dir": "/data/bahrdoh/Deep_Learning_Pipeline/experiments/test/20240620_230300/figures",
+    "optuna_figures_dir": "/data/bahrdoh/Deep_Learning_Pipeline/experiments/test/20240620_230300/figures",
+    "optuna_pickles_dir": "/data/bahrdoh/Deep_Learning_Pipeline/experiments/test/20240620_230300/pickles",
+    "wandb_mode": "online",
+    "seed": 4,
+    "nr_of_decimals": 3,
+    "cudnn_benchmark": true,
+    "dataset_type": "cache",
+    "cache_rate": 1.0,
+    "num_workers": 4,
+    "to_device": false,
+    "dataloader_type": "standard",
+    "use_sampler": false,
+    "dataloader_drop_last": false,
+    "torch_version": "2.0.1+cu117",
+    "gpu_condition": true,
+    "pin_memory": true,
+    "device": "cuda",
+    "n_input_channels": 1,
+    "image_keys": [
+        "fixed",
+        "moving",
+        "pos"
+    ],
+    "concat_key": "fixed_moving",
+    "train_frac": 0.9,
+    "val_frac": 0.15,
+    "sampling_type": "stratified",
+    "perform_stratified_sampling_full": true,
+    "strata_groups": [
+        "pat_id"
+    ],
+    "split_col": "Split",
+    "features_dl": [],
+    "cv_strata_groups": [
+        "pat_id"
+    ],
+    "cv_folds": 2,
+    "cv_type": "stratified",
+    "output_size": [
+        128,
+        128,
+        128
+    ],
+    "spacing": [
+        4.0,
+        4.0,
+        4.0
+    ],
+    "perform_data_aug": true,
+    "data_aug_p": 0.9603060128410927,
+    "data_aug_strength": 2.4790224015204996,
+    "ct_clip": false,
+    "ct_a_min": -200,
+    "ct_a_max": 400,
+    "ct_b_min": 0.0,
+    "ct_b_max": 1.0,
+    "rtdose_clip": false,
+    "rtdose_a_min": 0,
+    "rtdose_a_max": 8000,
+    "rtdose_b_min": 0.0,
+    "rtdose_b_max": 1.0,
+    "seg_map_clip": false,
+    "perform_cropping": true,
+    "cropping_dim": [
+        110,
+        110,
+        110
+    ],
+    "num_sample": 4,
+    "perform_augmix": false,
+    "mixture_width": 3,
+    "mixture_depth": [
+        1,
+        3
+    ],
+    "augmix_strength": 1.6352040193993949,
+    "ct_interpol_mode_3d": "trilinear",
+    "rtdose_interpol_mode_3d": "trilinear",
+    "segmentation_interpol_mode_3d": "nearest",
+    "ct_dose_seg_interpol_mode_3d": "trilinear",
+    "ct_interpol_mode_2d": "bilinear",
+    "rtdose_interpol_mode_2d": "bilinear",
+    "segmentation_interpol_mode_2d": "nearest",
+    "ct_dose_seg_interpol_mode_2d": "bilinear",
+    "sigma_elastic": [
+        8,
+        8
+    ],
+    "magnitude_elastic": [
+        100,
+        100
+    ],
+    "model_name": "Dual_DCNN_LReLu",
+    "n_layers": 5,
+    "filters": [
+        16,
+        16,
+        32,
+        64,
+        128
+    ],
+    "kernel_sizes": [
+        [
+            1,
+            5,
+            5
+        ],
+        [
+            1,
+            4,
+            4
+        ],
+        [
+            1,
+            4,
+            4
+        ],
+        [
+            1,
+            4,
+            4
+        ],
+        [
+            1,
+            3,
+            3
+        ]
+    ],
+    "strides": [
+        [
+            2,
+            2,
+            2
+        ],
+        [
+            2,
+            2,
+            2
+        ],
+        [
+            2,
+            2,
+            2
+        ],
+        [
+            2,
+            2,
+            2
+        ],
+        [
+            2,
+            2,
+            2
+        ]
+    ],
+    "pad_value": 0,
+    "lrelu_alpha": 0.1,
+    "pooling_conv_filters": null,
+    "perform_pooling": false,
+    "linear_units": [
+        16,
+        16,
+        16
+    ],
+    "dropout_p_j": [
+        0.24151713213135217,
+        0.24151713213135217,
+        0.24151713213135217
+    ],
+    "use_bias": true,
+    "num_classes": 2,
+    "num_ohe_classes": 2,
+    "kernel_size_pool": 3,
+    "stride_pool": 1,
+    "padding_pool": 0,
+    "perform_max_pool": [
+        true,
+        true
+    ],
+    "perform_activation": [
+        true,
+        true
+    ],
+    "pretrained_path": null,
+    "weight_init_name": "kaiming_uniform",
+    "kaiming_a": 2.2360679775,
+    "kaiming_mode": "fan_in",
+    "kaiming_nonlinearity": "leaky_relu",
+    "gain": 0,
+    "optimizer_name": "sgd_w",
+    "optimizer_name_next": [],
+    "momentum": 0.1530705151247731,
+    "weight_decay": 0.0695529528770911,
+    "hessian_power": 1.0,
+    "use_lookahead": false,
+    "lookahead_k": 5,
+    "lookahead_alpha": 0.5,
+    "patience_opt": 9,
+    "loss_function_name": "l1_loss",
+    "loss_weights": [
+        "l1_loss",
+        [
+            1,
+            0,
+            1,
+            1,
+            0,
+            0
+        ],
+        "mean",
+        0.3427638337743084,
+        0.3041207890271841,
+        0.4170222110247016,
+        0.6813007657927966,
+        0.8754568417951749,
+        0.5104223374780111
+    ],
+    "label_weights": [
+        1,
+        1.5
+    ],
+    "loss_reduction": "mean",
+    "scheduler_name": "step_lr",
+    "step_size_up": 256,
+    "gamma": 0.9594431879445042,
+    "grad_max_norm": null,
+    "step_size": 15,
+    "schedular_mode": "min",
+    "schedular_factor": 0.1,
+    "verbose": true,
+    "patience": 10,
+    "lr": 0.0029074946148503217,
+    "lr_finder_lower_lr": 1e-06,
+    "lr_finder_upper_lr": 0.001,
+    "lr_finder_num_iter": 0,
+    "warmup_batches": 0,
+    "T0": 47,
+    "T_mult": 1,
+    "eta_min": 1e-08,
+    "base_lr": 1e-07,
+    "max_lr": 0.0001,
+    "factor_lr": 0.5,
+    "min_lr": 1e-08,
+    "patience_lr": 7,
+    "manual_lr": [
+        0.001,
+        1e-05,
+        1e-06
+    ],
+    "nr_runs": 1,
+    "max_epochs": 200,
+    "batch_size": 16,
+    "max_batch_size": 16,
+    "eval_interval": 1,
+    "plot_interval": 10,
+    "max_nr_images_per_interval": 1,
+    "figsize": [
+        12,
+        12
+    ],
+    "optuna_n_trials": 100,
+    "batch_size_list": [
+        8,
+        16,
+        32,
+        64
+    ],
+    "filters_list": [
+        [
+            16,
+            16,
+            32,
+            32,
+            64
+        ],
+        [
+            8,
+            8,
+            16,
+            32,
+            64
+        ],
+        [
+            16,
+            16,
+            32,
+            64,
+            128
+        ],
+        [
+            16,
+            16,
+            16,
+            32,
+            32
+        ],
+        [
+            8,
+            8,
+            16,
+            16,
+            32
+        ],
+        [
+            8,
+            8,
+            8,
+            16,
+            16
+        ]
+    ],
+    "kernel_size_range": [
+        3,
+        7
+    ],
+    "linear_units_size": 3,
+    "linear_units_list": [
+        8,
+        16,
+        32,
+        64
+    ],
+    "clinical_variables_linear_units_size": 3,
+    "clinical_variables_linear_units_list": [
+        8,
+        16,
+        32,
+        64
+    ],
+    "clinical_variables_dropout_p_j": [
+        0.30644726288148383,
+        0.30644726288148383,
+        0.30644726288148383
+    ],
+    "features_dl_list": [
+        []
+    ],
+    "optuna_step_size_up": [
+        256,
+        512,
+        1024
+    ],
+    "loss_function_weights_ce": 0.3427638337743084,
+    "loss_function_weights_f1": 0.3041207890271841,
+    "loss_function_weights_dice": 0.4170222110247016,
+    "loss_function_weights_l1": 0.6813007657927966,
+    "loss_function_weights_ranking": 0.8754568417951749,
+    "loss_function_weights_softauc": 0.5104223374780111,
+    "stride_value_last_layer": 2,
+    "T0_cosine": 8,
+    "use_momentum": true,
+    "label_smoothing": 0.03187664263818764,
+    "segmentation_structures": [],
+    "batch_size_idx": 1,
+    "filter_size_idx": 2,
+    "filter_size": [
+        16,
+        16,
+        32,
+        64,
+        128
+    ],
+    "linear_units_size_idx": 2,
+    "clinical_variables_linear_units_size_idx": 2,
+    "clinical_variables_linear_units": [
+        32,
+        32,
+        32
+    ],
+    "features_dl_idx": 0,
+    "step_size_up_idx": 0,
+    "kernel_sizes_0": 5,
+    "kernel_sizes_1": 4,
+    "kernel_sizes_2": 4,
+    "kernel_sizes_3": 4,
+    "kernel_sizes_4": 3,
+    "sigmoid_act": "Sigmoid()",
+    "softmax_act": "<monai.transforms.post.array.Activations object at 0x7f48d6a5ad50>",
+    "to_onehot": "<monai.transforms.post.array.AsDiscrete object at 0x7f48d6a58350>",
+    "mse_metric": "MSEMetric",
+    "auc_metric": "ROCAUCMetric",
+    "excl": ""
+}

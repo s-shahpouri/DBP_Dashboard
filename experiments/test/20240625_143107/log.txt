@@ -1,0 +1,339 @@
+2024-06-25 14:31:07,439 - INFO: Device: cuda.
+2024-06-25 14:31:07,439 - INFO: Torch version: 2.0.1+cu117.
+2024-06-25 14:31:07,439 - INFO: Torch.backends.cudnn.benchmark: True.
+2024-06-25 14:31:07,439 - INFO: Model name: Dual_DCNN_LReLu
+2024-06-25 14:31:07,439 - INFO: Seed: 4
+2024-06-25 14:31:07,440 - INFO: 42 patients have been found in the data directory.
+2024-06-25 14:31:07,476 - INFO: Train set contains 32 patients.
+2024-06-25 14:31:07,476 - INFO: Val set contains 5 patients.
+2024-06-25 14:31:07,476 - INFO: Test set contains 5 patients.
+2024-06-25 14:31:07,476 - INFO: Fold: 0
+2024-06-25 14:31:07,477 - INFO: Performing 2-fold Cross Validation.
+2024-06-25 14:31:07,477 - INFO: Train Set: 910/1970, percent: 0.462
+2024-06-25 14:31:07,477 - INFO: Val Set: 910/1970, percent: 0.462
+2024-06-25 14:31:07,477 - INFO: Test Set: 150/1970, percent: 0.076
+2024-06-25 14:31:07,597 - INFO: To_device: False.
+2024-06-25 14:31:07,598 - INFO: Transformers have been made successfully.
+2024-06-25 14:31:07,598 - INFO: Dataset type: cache.
+2024-06-25 14:31:07,599 - INFO: Dataloader type: standard.
+2024-06-25 14:33:03,652 - INFO: Train dataloader arguments.
+2024-06-25 14:33:03,652 - INFO: 	Batch_size: 32.
+2024-06-25 14:33:03,652 - INFO: 	Shuffle: True.
+2024-06-25 14:33:03,652 - INFO: 	Sampler: None.
+2024-06-25 14:33:03,652 - INFO: 	Num_workers: 4.
+2024-06-25 14:33:03,652 - INFO: 	Drop_last: False.
+2024-06-25 14:33:03,672 - INFO: Dual_DCNN_LReLU(
+  (conv_blocks_fixed): ModuleList(
+    (0): conv_block_two(
+      (pad1): conv3d_padding_same()
+      (conv1): Conv3d(1, 8, kernel_size=(1, 6, 6), stride=(2, 2, 2))
+      (norm1): BatchNorm3d(8, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (activation1): LeakyReLU(negative_slope=0.1)
+      (pad2): conv3d_padding_same()
+      (conv2): Conv3d(8, 8, kernel_size=(1, 6, 6), stride=(1, 1, 1))
+      (norm2): BatchNorm3d(8, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (activation2): LeakyReLU(negative_slope=0.1)
+      (max_pooling): MaxPool3d(kernel_size=3, stride=1, padding=0, dilation=1, ceil_mode=False)
+    )
+    (1): conv_block_two(
+      (pad1): conv3d_padding_same()
+      (conv1): Conv3d(8, 8, kernel_size=(1, 3, 3), stride=(2, 2, 2))
+      (norm1): BatchNorm3d(8, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (activation1): LeakyReLU(negative_slope=0.1)
+      (pad2): conv3d_padding_same()
+      (conv2): Conv3d(8, 8, kernel_size=(1, 3, 3), stride=(1, 1, 1))
+      (norm2): BatchNorm3d(8, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (activation2): LeakyReLU(negative_slope=0.1)
+      (max_pooling): MaxPool3d(kernel_size=3, stride=1, padding=0, dilation=1, ceil_mode=False)
+    )
+    (2): conv_block_two(
+      (pad1): conv3d_padding_same()
+      (conv1): Conv3d(8, 16, kernel_size=(1, 3, 3), stride=(2, 2, 2))
+      (norm1): BatchNorm3d(16, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (activation1): LeakyReLU(negative_slope=0.1)
+      (pad2): conv3d_padding_same()
+      (conv2): Conv3d(16, 16, kernel_size=(1, 3, 3), stride=(1, 1, 1))
+      (norm2): BatchNorm3d(16, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (activation2): LeakyReLU(negative_slope=0.1)
+      (max_pooling): MaxPool3d(kernel_size=3, stride=1, padding=0, dilation=1, ceil_mode=False)
+    )
+    (3): conv_block_two(
+      (pad1): conv3d_padding_same()
+      (conv1): Conv3d(16, 32, kernel_size=(1, 3, 3), stride=(2, 2, 2))
+      (norm1): BatchNorm3d(32, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (activation1): LeakyReLU(negative_slope=0.1)
+      (pad2): conv3d_padding_same()
+      (conv2): Conv3d(32, 32, kernel_size=(1, 3, 3), stride=(1, 1, 1))
+      (norm2): BatchNorm3d(32, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (activation2): LeakyReLU(negative_slope=0.1)
+      (max_pooling): MaxPool3d(kernel_size=3, stride=1, padding=0, dilation=1, ceil_mode=False)
+    )
+    (4): conv_block_two(
+      (pad1): conv3d_padding_same()
+      (conv1): Conv3d(32, 64, kernel_size=(1, 3, 3), stride=(1, 1, 1))
+      (norm1): BatchNorm3d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (activation1): LeakyReLU(negative_slope=0.1)
+      (pad2): conv3d_padding_same()
+      (conv2): Conv3d(64, 64, kernel_size=(1, 3, 3), stride=(1, 1, 1))
+      (norm2): BatchNorm3d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (activation2): LeakyReLU(negative_slope=0.1)
+      (max_pooling): MaxPool3d(kernel_size=3, stride=1, padding=0, dilation=1, ceil_mode=False)
+    )
+  )
+  (conv_blocks_moving): ModuleList(
+    (0): conv_block_two(
+      (pad1): conv3d_padding_same()
+      (conv1): Conv3d(1, 8, kernel_size=(1, 6, 6), stride=(2, 2, 2))
+      (norm1): BatchNorm3d(8, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (activation1): LeakyReLU(negative_slope=0.1)
+      (pad2): conv3d_padding_same()
+      (conv2): Conv3d(8, 8, kernel_size=(1, 6, 6), stride=(1, 1, 1))
+      (norm2): BatchNorm3d(8, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (activation2): LeakyReLU(negative_slope=0.1)
+      (max_pooling): MaxPool3d(kernel_size=3, stride=1, padding=0, dilation=1, ceil_mode=False)
+    )
+    (1): conv_block_two(
+      (pad1): conv3d_padding_same()
+      (conv1): Conv3d(8, 8, kernel_size=(1, 3, 3), stride=(2, 2, 2))
+      (norm1): BatchNorm3d(8, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (activation1): LeakyReLU(negative_slope=0.1)
+      (pad2): conv3d_padding_same()
+      (conv2): Conv3d(8, 8, kernel_size=(1, 3, 3), stride=(1, 1, 1))
+      (norm2): BatchNorm3d(8, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (activation2): LeakyReLU(negative_slope=0.1)
+      (max_pooling): MaxPool3d(kernel_size=3, stride=1, padding=0, dilation=1, ceil_mode=False)
+    )
+    (2): conv_block_two(
+      (pad1): conv3d_padding_same()
+      (conv1): Conv3d(8, 16, kernel_size=(1, 3, 3), stride=(2, 2, 2))
+      (norm1): BatchNorm3d(16, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (activation1): LeakyReLU(negative_slope=0.1)
+      (pad2): conv3d_padding_same()
+      (conv2): Conv3d(16, 16, kernel_size=(1, 3, 3), stride=(1, 1, 1))
+      (norm2): BatchNorm3d(16, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (activation2): LeakyReLU(negative_slope=0.1)
+      (max_pooling): MaxPool3d(kernel_size=3, stride=1, padding=0, dilation=1, ceil_mode=False)
+    )
+    (3): conv_block_two(
+      (pad1): conv3d_padding_same()
+      (conv1): Conv3d(16, 32, kernel_size=(1, 3, 3), stride=(2, 2, 2))
+      (norm1): BatchNorm3d(32, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (activation1): LeakyReLU(negative_slope=0.1)
+      (pad2): conv3d_padding_same()
+      (conv2): Conv3d(32, 32, kernel_size=(1, 3, 3), stride=(1, 1, 1))
+      (norm2): BatchNorm3d(32, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (activation2): LeakyReLU(negative_slope=0.1)
+      (max_pooling): MaxPool3d(kernel_size=3, stride=1, padding=0, dilation=1, ceil_mode=False)
+    )
+    (4): conv_block_two(
+      (pad1): conv3d_padding_same()
+      (conv1): Conv3d(32, 64, kernel_size=(1, 3, 3), stride=(1, 1, 1))
+      (norm1): BatchNorm3d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (activation1): LeakyReLU(negative_slope=0.1)
+      (pad2): conv3d_padding_same()
+      (conv2): Conv3d(64, 64, kernel_size=(1, 3, 3), stride=(1, 1, 1))
+      (norm2): BatchNorm3d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (activation2): LeakyReLU(negative_slope=0.1)
+      (max_pooling): MaxPool3d(kernel_size=3, stride=1, padding=0, dilation=1, ceil_mode=False)
+    )
+  )
+  (linear_layers): ModuleList(
+    (0): Dropout(p=0.35973448489278154, inplace=False)
+    (1): Linear(in_features=65536, out_features=32, bias=True)
+  )
+  (out_layer): Output(
+    in_features=32, out_features=3, bias=True
+    (fc): Linear(in_features=32, out_features=3, bias=True)
+  )
+)
+2024-06-25 14:33:04,780 - INFO: Weight init name: kaiming_uniform.
+2024-06-25 14:33:07,587 - INFO: Number of training iterations per epoch: 29.
+2024-06-25 14:33:07,588 - INFO: Epoch 1/200...
+2024-06-25 14:33:07,588 - INFO: Learning rate: 0.00043653266681613063.
+2024-06-25 14:33:07,588 - INFO: Batch size: 32.
+2024-06-25 14:33:07,588 - INFO: Dataset:
+2024-06-25 14:33:07,588 - INFO: Batch size:
+2024-06-25 14:33:07,588 - INFO: Number of workers:
+2024-06-25 14:33:10,407 - INFO: Epoch: 1/200, Batch: 1/29, Batch_Loss_Train: 7.941
+2024-06-25 14:33:10,703 - INFO: Epoch: 1/200, Batch: 2/29, Batch_Loss_Train: 7.283
+2024-06-25 14:33:11,084 - INFO: Epoch: 1/200, Batch: 3/29, Batch_Loss_Train: 8.065
+2024-06-25 14:33:11,382 - INFO: Epoch: 1/200, Batch: 4/29, Batch_Loss_Train: 7.159
+2024-06-25 14:33:11,772 - INFO: Epoch: 1/200, Batch: 5/29, Batch_Loss_Train: 11.383
+2024-06-25 14:33:12,066 - INFO: Epoch: 1/200, Batch: 6/29, Batch_Loss_Train: 8.053
+2024-06-25 14:33:12,457 - INFO: Epoch: 1/200, Batch: 7/29, Batch_Loss_Train: 7.071
+2024-06-25 14:33:12,754 - INFO: Epoch: 1/200, Batch: 8/29, Batch_Loss_Train: 7.700
+2024-06-25 14:33:13,145 - INFO: Epoch: 1/200, Batch: 9/29, Batch_Loss_Train: 8.764
+2024-06-25 14:33:13,437 - INFO: Epoch: 1/200, Batch: 10/29, Batch_Loss_Train: 9.054
+2024-06-25 14:33:13,825 - INFO: Epoch: 1/200, Batch: 11/29, Batch_Loss_Train: 6.702
+2024-06-25 14:33:14,124 - INFO: Epoch: 1/200, Batch: 12/29, Batch_Loss_Train: 6.761
+2024-06-25 14:33:14,534 - INFO: Epoch: 1/200, Batch: 13/29, Batch_Loss_Train: 7.467
+2024-06-25 14:33:14,834 - INFO: Epoch: 1/200, Batch: 14/29, Batch_Loss_Train: 7.748
+2024-06-25 14:33:15,244 - INFO: Epoch: 1/200, Batch: 15/29, Batch_Loss_Train: 7.260
+2024-06-25 14:33:15,544 - INFO: Epoch: 1/200, Batch: 16/29, Batch_Loss_Train: 6.604
+2024-06-25 14:33:15,956 - INFO: Epoch: 1/200, Batch: 17/29, Batch_Loss_Train: 6.520
+2024-06-25 14:33:16,257 - INFO: Epoch: 1/200, Batch: 18/29, Batch_Loss_Train: 5.611
+2024-06-25 14:33:16,668 - INFO: Epoch: 1/200, Batch: 19/29, Batch_Loss_Train: 5.903
+2024-06-25 14:33:16,962 - INFO: Epoch: 1/200, Batch: 20/29, Batch_Loss_Train: 6.401
+2024-06-25 14:33:17,355 - INFO: Epoch: 1/200, Batch: 21/29, Batch_Loss_Train: 5.672
+2024-06-25 14:33:17,653 - INFO: Epoch: 1/200, Batch: 22/29, Batch_Loss_Train: 5.818
+2024-06-25 14:33:18,072 - INFO: Epoch: 1/200, Batch: 23/29, Batch_Loss_Train: 6.402
+2024-06-25 14:33:18,371 - INFO: Epoch: 1/200, Batch: 24/29, Batch_Loss_Train: 5.689
+2024-06-25 14:33:18,764 - INFO: Epoch: 1/200, Batch: 25/29, Batch_Loss_Train: 5.555
+2024-06-25 14:33:19,061 - INFO: Epoch: 1/200, Batch: 26/29, Batch_Loss_Train: 6.681
+2024-06-25 14:33:19,462 - INFO: Epoch: 1/200, Batch: 27/29, Batch_Loss_Train: 5.704
+2024-06-25 14:33:19,759 - INFO: Epoch: 1/200, Batch: 28/29, Batch_Loss_Train: 6.625
+2024-06-25 14:33:21,050 - INFO: Epoch: 1/200, Batch: 29/29, Batch_Loss_Train: 7.308
+2024-06-25 14:33:31,002 - INFO: 1/200 final results:
+2024-06-25 14:33:31,002 - INFO: Training loss: 7.066.
+2024-06-25 14:33:31,002 - INFO: Training MAE: 7.061.
+2024-06-25 14:33:31,002 - INFO: Training MSE: 72.329.
+2024-06-25 14:33:49,728 - INFO: Epoch: 1/200, Loss_train: 7.065634184870227, Loss_val: 7.265347891840442
+2024-06-25 14:33:49,729 - INFO: Best internal validation val_loss: inf at epoch: 0.
+2024-06-25 14:33:49,729 - INFO: Epoch 2/200...
+2024-06-25 14:33:49,729 - INFO: Learning rate: 0.00043653266681613063.
+2024-06-25 14:33:49,729 - INFO: Batch size: 32.
+2024-06-25 14:33:49,732 - INFO: Dataset:
+2024-06-25 14:33:49,732 - INFO: Batch size:
+2024-06-25 14:33:49,732 - INFO: Number of workers:
+2024-06-25 14:33:50,673 - INFO: Epoch: 2/200, Batch: 1/29, Batch_Loss_Train: 6.902
+2024-06-25 14:33:50,985 - INFO: Epoch: 2/200, Batch: 2/29, Batch_Loss_Train: 6.028
+2024-06-25 14:33:51,381 - INFO: Epoch: 2/200, Batch: 3/29, Batch_Loss_Train: 6.066
+2024-06-25 14:33:51,691 - INFO: Epoch: 2/200, Batch: 4/29, Batch_Loss_Train: 6.410
+2024-06-25 14:33:52,079 - INFO: Epoch: 2/200, Batch: 5/29, Batch_Loss_Train: 5.582
+2024-06-25 14:33:52,385 - INFO: Epoch: 2/200, Batch: 6/29, Batch_Loss_Train: 6.027
+2024-06-25 14:33:52,770 - INFO: Epoch: 2/200, Batch: 7/29, Batch_Loss_Train: 6.145
+2024-06-25 14:33:53,076 - INFO: Epoch: 2/200, Batch: 8/29, Batch_Loss_Train: 5.984
+2024-06-25 14:33:53,445 - INFO: Epoch: 2/200, Batch: 9/29, Batch_Loss_Train: 5.833
+2024-06-25 14:33:53,753 - INFO: Epoch: 2/200, Batch: 10/29, Batch_Loss_Train: 6.215
+2024-06-25 14:33:54,130 - INFO: Epoch: 2/200, Batch: 11/29, Batch_Loss_Train: 7.115
+2024-06-25 14:33:54,440 - INFO: Epoch: 2/200, Batch: 12/29, Batch_Loss_Train: 6.582
+2024-06-25 14:33:54,839 - INFO: Epoch: 2/200, Batch: 13/29, Batch_Loss_Train: 6.518
+2024-06-25 14:33:55,149 - INFO: Epoch: 2/200, Batch: 14/29, Batch_Loss_Train: 6.185
+2024-06-25 14:33:55,542 - INFO: Epoch: 2/200, Batch: 15/29, Batch_Loss_Train: 6.801
+2024-06-25 14:33:55,851 - INFO: Epoch: 2/200, Batch: 16/29, Batch_Loss_Train: 6.072
+2024-06-25 14:33:56,247 - INFO: Epoch: 2/200, Batch: 17/29, Batch_Loss_Train: 6.034
+2024-06-25 14:33:56,558 - INFO: Epoch: 2/200, Batch: 18/29, Batch_Loss_Train: 5.769
+2024-06-25 14:33:56,944 - INFO: Epoch: 2/200, Batch: 19/29, Batch_Loss_Train: 5.669
+2024-06-25 14:33:57,248 - INFO: Epoch: 2/200, Batch: 20/29, Batch_Loss_Train: 6.107
+2024-06-25 14:33:57,628 - INFO: Epoch: 2/200, Batch: 21/29, Batch_Loss_Train: 6.147
+2024-06-25 14:33:57,935 - INFO: Epoch: 2/200, Batch: 22/29, Batch_Loss_Train: 5.659
+2024-06-25 14:33:58,328 - INFO: Epoch: 2/200, Batch: 23/29, Batch_Loss_Train: 6.391
+2024-06-25 14:33:58,636 - INFO: Epoch: 2/200, Batch: 24/29, Batch_Loss_Train: 5.885
+2024-06-25 14:33:59,014 - INFO: Epoch: 2/200, Batch: 25/29, Batch_Loss_Train: 6.663
+2024-06-25 14:33:59,320 - INFO: Epoch: 2/200, Batch: 26/29, Batch_Loss_Train: 6.016
+2024-06-25 14:33:59,704 - INFO: Epoch: 2/200, Batch: 27/29, Batch_Loss_Train: 5.576
+2024-06-25 14:34:00,010 - INFO: Epoch: 2/200, Batch: 28/29, Batch_Loss_Train: 5.892
+2024-06-25 14:34:00,221 - INFO: Epoch: 2/200, Batch: 29/29, Batch_Loss_Train: 5.275
+2024-06-25 14:34:10,240 - INFO: 2/200 final results:
+2024-06-25 14:34:10,240 - INFO: Training loss: 6.122.
+2024-06-25 14:34:10,240 - INFO: Training MAE: 6.139.
+2024-06-25 14:34:10,240 - INFO: Training MSE: 55.770.
+2024-06-25 14:34:28,997 - INFO: Epoch: 2/200, Loss_train: 6.122355740645836, Loss_val: 7.089518267532875
+2024-06-25 14:34:29,015 - INFO: Saved new best metric model for epoch 2.
+2024-06-25 14:34:29,015 - INFO: Best internal validation val_loss: 7.090 at epoch: 2.
+2024-06-25 14:34:29,015 - INFO: Epoch 3/200...
+2024-06-25 14:34:29,015 - INFO: Learning rate: 0.00043653266681613063.
+2024-06-25 14:34:29,015 - INFO: Batch size: 32.
+2024-06-25 14:34:29,018 - INFO: Dataset:
+2024-06-25 14:34:29,019 - INFO: Batch size:
+2024-06-25 14:34:29,019 - INFO: Number of workers:
+2024-06-25 14:34:29,978 - INFO: Epoch: 3/200, Batch: 1/29, Batch_Loss_Train: 6.257
+2024-06-25 14:34:30,279 - INFO: Epoch: 3/200, Batch: 2/29, Batch_Loss_Train: 5.852
+2024-06-25 14:34:30,657 - INFO: Epoch: 3/200, Batch: 3/29, Batch_Loss_Train: 6.217
+2024-06-25 14:34:30,968 - INFO: Epoch: 3/200, Batch: 4/29, Batch_Loss_Train: 5.181
+2024-06-25 14:34:31,355 - INFO: Epoch: 3/200, Batch: 5/29, Batch_Loss_Train: 4.926
+2024-06-25 14:34:31,674 - INFO: Epoch: 3/200, Batch: 6/29, Batch_Loss_Train: 5.772
+2024-06-25 14:34:32,031 - INFO: Epoch: 3/200, Batch: 7/29, Batch_Loss_Train: 6.146
+2024-06-25 14:34:32,337 - INFO: Epoch: 3/200, Batch: 8/29, Batch_Loss_Train: 5.652
+2024-06-25 14:34:32,711 - INFO: Epoch: 3/200, Batch: 9/29, Batch_Loss_Train: 5.659
+2024-06-25 14:34:33,040 - INFO: Epoch: 3/200, Batch: 10/29, Batch_Loss_Train: 5.892
+2024-06-25 14:34:33,398 - INFO: Epoch: 3/200, Batch: 11/29, Batch_Loss_Train: 6.077
+2024-06-25 14:34:33,707 - INFO: Epoch: 3/200, Batch: 12/29, Batch_Loss_Train: 6.296
+2024-06-25 14:34:34,100 - INFO: Epoch: 3/200, Batch: 13/29, Batch_Loss_Train: 6.172
+2024-06-25 14:34:34,421 - INFO: Epoch: 3/200, Batch: 14/29, Batch_Loss_Train: 5.749
+2024-06-25 14:34:34,798 - INFO: Epoch: 3/200, Batch: 15/29, Batch_Loss_Train: 5.306
+2024-06-25 14:34:35,105 - INFO: Epoch: 3/200, Batch: 16/29, Batch_Loss_Train: 6.232
+2024-06-25 14:34:35,495 - INFO: Epoch: 3/200, Batch: 17/29, Batch_Loss_Train: 6.610
+2024-06-25 14:34:35,816 - INFO: Epoch: 3/200, Batch: 18/29, Batch_Loss_Train: 5.338
+2024-06-25 14:34:36,183 - INFO: Epoch: 3/200, Batch: 19/29, Batch_Loss_Train: 5.604
+2024-06-25 14:34:36,487 - INFO: Epoch: 3/200, Batch: 20/29, Batch_Loss_Train: 5.934
+2024-06-25 14:34:36,864 - INFO: Epoch: 3/200, Batch: 21/29, Batch_Loss_Train: 5.928
+2024-06-25 14:34:37,181 - INFO: Epoch: 3/200, Batch: 22/29, Batch_Loss_Train: 5.759
+2024-06-25 14:34:37,553 - INFO: Epoch: 3/200, Batch: 23/29, Batch_Loss_Train: 5.723
+2024-06-25 14:34:37,860 - INFO: Epoch: 3/200, Batch: 24/29, Batch_Loss_Train: 6.420
+2024-06-25 14:34:38,246 - INFO: Epoch: 3/200, Batch: 25/29, Batch_Loss_Train: 5.804
+2024-06-25 14:34:38,563 - INFO: Epoch: 3/200, Batch: 26/29, Batch_Loss_Train: 5.826
+2024-06-25 14:34:38,930 - INFO: Epoch: 3/200, Batch: 27/29, Batch_Loss_Train: 4.776
+2024-06-25 14:34:39,237 - INFO: Epoch: 3/200, Batch: 28/29, Batch_Loss_Train: 5.832
+2024-06-25 14:34:39,443 - INFO: Epoch: 3/200, Batch: 29/29, Batch_Loss_Train: 6.278
+2024-06-25 14:34:49,398 - INFO: 3/200 final results:
+2024-06-25 14:34:49,398 - INFO: Training loss: 5.835.
+2024-06-25 14:34:49,398 - INFO: Training MAE: 5.826.
+2024-06-25 14:34:49,398 - INFO: Training MSE: 52.516.
+2024-06-25 14:35:08,835 - INFO: Epoch: 3/200, Loss_train: 5.8350621585188245, Loss_val: 7.496965342554553
+2024-06-25 14:35:08,836 - INFO: Best internal validation val_loss: 7.090 at epoch: 2.
+2024-06-25 14:35:08,836 - INFO: Epoch 4/200...
+2024-06-25 14:35:08,836 - INFO: Learning rate: 0.00043653266681613063.
+2024-06-25 14:35:08,836 - INFO: Batch size: 32.
+2024-06-25 14:35:08,839 - INFO: Dataset:
+2024-06-25 14:35:08,840 - INFO: Batch size:
+2024-06-25 14:35:08,840 - INFO: Number of workers:
+2024-06-25 14:35:10,221 - INFO: Epoch: 4/200, Batch: 1/29, Batch_Loss_Train: 5.778
+2024-06-25 14:35:10,739 - INFO: Epoch: 4/200, Batch: 2/29, Batch_Loss_Train: 6.612
+2024-06-25 14:35:11,356 - INFO: Epoch: 4/200, Batch: 3/29, Batch_Loss_Train: 5.047
+2024-06-25 14:35:11,883 - INFO: Epoch: 4/200, Batch: 4/29, Batch_Loss_Train: 5.320
+2024-06-25 14:35:12,553 - INFO: Epoch: 4/200, Batch: 5/29, Batch_Loss_Train: 5.397
+2024-06-25 14:35:13,062 - INFO: Epoch: 4/200, Batch: 6/29, Batch_Loss_Train: 6.017
+2024-06-25 14:35:13,456 - INFO: Epoch: 4/200, Batch: 7/29, Batch_Loss_Train: 5.987
+2024-06-25 14:35:13,759 - INFO: Epoch: 4/200, Batch: 8/29, Batch_Loss_Train: 5.673
+2024-06-25 14:35:14,324 - INFO: Epoch: 4/200, Batch: 9/29, Batch_Loss_Train: 5.865
+2024-06-25 14:35:14,826 - INFO: Epoch: 4/200, Batch: 10/29, Batch_Loss_Train: 6.426
+2024-06-25 14:35:15,411 - INFO: Epoch: 4/200, Batch: 11/29, Batch_Loss_Train: 6.002
+2024-06-25 14:35:15,933 - INFO: Epoch: 4/200, Batch: 12/29, Batch_Loss_Train: 5.842
+2024-06-25 14:35:16,584 - INFO: Epoch: 4/200, Batch: 13/29, Batch_Loss_Train: 6.356
+2024-06-25 14:35:17,106 - INFO: Epoch: 4/200, Batch: 14/29, Batch_Loss_Train: 6.389
+2024-06-25 14:35:17,716 - INFO: Epoch: 4/200, Batch: 15/29, Batch_Loss_Train: 5.653
+2024-06-25 14:35:18,234 - INFO: Epoch: 4/200, Batch: 16/29, Batch_Loss_Train: 4.741
+2024-06-25 14:35:18,891 - INFO: Epoch: 4/200, Batch: 17/29, Batch_Loss_Train: 5.463
+2024-06-25 14:35:19,350 - INFO: Epoch: 4/200, Batch: 18/29, Batch_Loss_Train: 5.995
+2024-06-25 14:35:19,958 - INFO: Epoch: 4/200, Batch: 19/29, Batch_Loss_Train: 5.545
+2024-06-25 14:35:20,384 - INFO: Epoch: 4/200, Batch: 20/29, Batch_Loss_Train: 5.588
+2024-06-25 14:35:20,804 - INFO: Epoch: 4/200, Batch: 21/29, Batch_Loss_Train: 5.835
+2024-06-25 14:35:21,116 - INFO: Epoch: 4/200, Batch: 22/29, Batch_Loss_Train: 6.055
+2024-06-25 14:35:21,563 - INFO: Epoch: 4/200, Batch: 23/29, Batch_Loss_Train: 5.107
+2024-06-25 14:35:22,079 - INFO: Epoch: 4/200, Batch: 24/29, Batch_Loss_Train: 5.959
+2024-06-25 14:35:22,725 - INFO: Epoch: 4/200, Batch: 25/29, Batch_Loss_Train: 5.419
+2024-06-25 14:35:23,229 - INFO: Epoch: 4/200, Batch: 26/29, Batch_Loss_Train: 5.972
+2024-06-25 14:35:23,819 - INFO: Epoch: 4/200, Batch: 27/29, Batch_Loss_Train: 5.068
+2024-06-25 14:35:24,322 - INFO: Epoch: 4/200, Batch: 28/29, Batch_Loss_Train: 5.854
+2024-06-25 14:35:24,642 - INFO: Epoch: 4/200, Batch: 29/29, Batch_Loss_Train: 6.608
+2024-06-25 14:35:34,953 - INFO: 4/200 final results:
+2024-06-25 14:35:34,953 - INFO: Training loss: 5.778.
+2024-06-25 14:35:34,953 - INFO: Training MAE: 5.762.
+2024-06-25 14:35:34,953 - INFO: Training MSE: 51.664.
+2024-06-25 14:35:55,632 - INFO: Epoch: 4/200, Loss_train: 5.778387793179216, Loss_val: 6.161460958678147
+2024-06-25 14:35:55,650 - INFO: Saved new best metric model for epoch 4.
+2024-06-25 14:35:55,650 - INFO: Best internal validation val_loss: 6.161 at epoch: 4.
+2024-06-25 14:35:55,650 - INFO: Epoch 5/200...
+2024-06-25 14:35:55,650 - INFO: Learning rate: 0.00043653266681613063.
+2024-06-25 14:35:55,650 - INFO: Batch size: 32.
+2024-06-25 14:35:55,654 - INFO: Dataset:
+2024-06-25 14:35:55,654 - INFO: Batch size:
+2024-06-25 14:35:55,654 - INFO: Number of workers:
+2024-06-25 14:35:56,862 - INFO: Epoch: 5/200, Batch: 1/29, Batch_Loss_Train: 5.259
+2024-06-25 14:35:57,409 - INFO: Epoch: 5/200, Batch: 2/29, Batch_Loss_Train: 5.209
+2024-06-25 14:35:58,056 - INFO: Epoch: 5/200, Batch: 3/29, Batch_Loss_Train: 6.659
+2024-06-25 14:35:58,598 - INFO: Epoch: 5/200, Batch: 4/29, Batch_Loss_Train: 5.613
+2024-06-25 14:35:59,243 - INFO: Epoch: 5/200, Batch: 5/29, Batch_Loss_Train: 5.438
+2024-06-25 14:35:59,572 - INFO: Epoch: 5/200, Batch: 6/29, Batch_Loss_Train: 5.297
+2024-06-25 14:35:59,971 - INFO: Epoch: 5/200, Batch: 7/29, Batch_Loss_Train: 5.669
+2024-06-25 14:36:00,285 - INFO: Epoch: 5/200, Batch: 8/29, Batch_Loss_Train: 5.105
+2024-06-25 14:36:00,682 - INFO: Epoch: 5/200, Batch: 9/29, Batch_Loss_Train: 5.817
+2024-06-25 14:36:01,003 - INFO: Epoch: 5/200, Batch: 10/29, Batch_Loss_Train: 5.671
+2024-06-25 14:36:01,474 - INFO: Epoch: 5/200, Batch: 11/29, Batch_Loss_Train: 5.593
+2024-06-25 14:36:02,029 - INFO: Epoch: 5/200, Batch: 12/29, Batch_Loss_Train: 5.345
+2024-06-25 14:36:02,688 - INFO: Epoch: 5/200, Batch: 13/29, Batch_Loss_Train: 5.784
+2024-06-25 14:36:03,226 - INFO: Epoch: 5/200, Batch: 14/29, Batch_Loss_Train: 4.929
+2024-06-25 14:36:03,874 - INFO: Epoch: 5/200, Batch: 15/29, Batch_Loss_Train: 5.016
+2024-06-25 14:36:04,374 - INFO: Epoch: 5/200, Batch: 16/29, Batch_Loss_Train: 5.725
+2024-06-25 14:36:05,036 - INFO: Epoch: 5/200, Batch: 17/29, Batch_Loss_Train: 5.090

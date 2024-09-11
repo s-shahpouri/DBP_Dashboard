@@ -1,0 +1,122 @@
+2024-06-21 12:55:08,198 - INFO: Device: cuda.
+2024-06-21 12:55:08,198 - INFO: Torch version: 2.0.1+cu117.
+2024-06-21 12:55:08,198 - INFO: Torch.backends.cudnn.benchmark: True.
+2024-06-21 12:55:08,198 - INFO: Model name: Dual_DCNN_LReLu
+2024-06-21 12:55:08,198 - INFO: Seed: 4
+2024-06-21 12:55:08,198 - INFO: 42 patients have been found in the data directory.
+2024-06-21 12:55:08,237 - INFO: Train set contains 32 patients.
+2024-06-21 12:55:08,237 - INFO: Val set contains 5 patients.
+2024-06-21 12:55:08,237 - INFO: Test set contains 5 patients.
+2024-06-21 12:55:08,237 - INFO: Fold: 0
+2024-06-21 12:55:08,238 - INFO: Performing 2-fold Cross Validation.
+2024-06-21 12:55:08,238 - INFO: Train Set: 910/1970, percent: 0.462
+2024-06-21 12:55:08,238 - INFO: Val Set: 910/1970, percent: 0.462
+2024-06-21 12:55:08,238 - INFO: Test Set: 150/1970, percent: 0.076
+2024-06-21 12:55:08,369 - INFO: To_device: False.
+2024-06-21 12:55:08,371 - INFO: Transformers have been made successfully.
+2024-06-21 12:55:08,371 - INFO: Dataset type: cache.
+2024-06-21 12:55:08,371 - INFO: Dataloader type: standard.
+2024-06-21 12:56:59,501 - INFO: Train dataloader arguments.
+2024-06-21 12:56:59,501 - INFO: 	Batch_size: 32.
+2024-06-21 12:56:59,501 - INFO: 	Shuffle: True.
+2024-06-21 12:56:59,501 - INFO: 	Sampler: None.
+2024-06-21 12:56:59,501 - INFO: 	Num_workers: 4.
+2024-06-21 12:56:59,501 - INFO: 	Drop_last: False.
+2024-06-21 12:56:59,673 - INFO: Dual_DCNN_LReLU(
+  (conv_blocks_fixed): ModuleList(
+    (0): conv_block_two(
+      (pad1): conv3d_padding_same()
+      (conv1): Conv3d(1, 8, kernel_size=(1, 7, 7), stride=(2, 2, 2))
+      (norm1): BatchNorm3d(8, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (activation1): LeakyReLU(negative_slope=0.1)
+      (pad2): conv3d_padding_same()
+      (conv2): Conv3d(8, 8, kernel_size=(1, 7, 7), stride=(1, 1, 1))
+      (norm2): BatchNorm3d(8, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (activation2): LeakyReLU(negative_slope=0.1)
+      (max_pooling): MaxPool3d(kernel_size=3, stride=1, padding=0, dilation=1, ceil_mode=False)
+    )
+    (1): conv_block_two(
+      (pad1): conv3d_padding_same()
+      (conv1): Conv3d(8, 8, kernel_size=(1, 5, 5), stride=(2, 2, 2))
+      (norm1): BatchNorm3d(8, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (activation1): LeakyReLU(negative_slope=0.1)
+      (pad2): conv3d_padding_same()
+      (conv2): Conv3d(8, 8, kernel_size=(1, 5, 5), stride=(1, 1, 1))
+      (norm2): BatchNorm3d(8, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (activation2): LeakyReLU(negative_slope=0.1)
+      (max_pooling): MaxPool3d(kernel_size=3, stride=1, padding=0, dilation=1, ceil_mode=False)
+    )
+    (2): conv_block_two(
+      (pad1): conv3d_padding_same()
+      (conv1): Conv3d(8, 16, kernel_size=(1, 4, 4), stride=(1, 1, 1))
+      (norm1): BatchNorm3d(16, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (activation1): LeakyReLU(negative_slope=0.1)
+      (pad2): conv3d_padding_same()
+      (conv2): Conv3d(16, 16, kernel_size=(1, 4, 4), stride=(1, 1, 1))
+      (norm2): BatchNorm3d(16, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (activation2): LeakyReLU(negative_slope=0.1)
+      (max_pooling): MaxPool3d(kernel_size=3, stride=1, padding=0, dilation=1, ceil_mode=False)
+    )
+  )
+  (conv_blocks_moving): ModuleList(
+    (0): conv_block_two(
+      (pad1): conv3d_padding_same()
+      (conv1): Conv3d(1, 8, kernel_size=(1, 7, 7), stride=(2, 2, 2))
+      (norm1): BatchNorm3d(8, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (activation1): LeakyReLU(negative_slope=0.1)
+      (pad2): conv3d_padding_same()
+      (conv2): Conv3d(8, 8, kernel_size=(1, 7, 7), stride=(1, 1, 1))
+      (norm2): BatchNorm3d(8, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (activation2): LeakyReLU(negative_slope=0.1)
+      (max_pooling): MaxPool3d(kernel_size=3, stride=1, padding=0, dilation=1, ceil_mode=False)
+    )
+    (1): conv_block_two(
+      (pad1): conv3d_padding_same()
+      (conv1): Conv3d(8, 8, kernel_size=(1, 5, 5), stride=(2, 2, 2))
+      (norm1): BatchNorm3d(8, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (activation1): LeakyReLU(negative_slope=0.1)
+      (pad2): conv3d_padding_same()
+      (conv2): Conv3d(8, 8, kernel_size=(1, 5, 5), stride=(1, 1, 1))
+      (norm2): BatchNorm3d(8, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (activation2): LeakyReLU(negative_slope=0.1)
+      (max_pooling): MaxPool3d(kernel_size=3, stride=1, padding=0, dilation=1, ceil_mode=False)
+    )
+    (2): conv_block_two(
+      (pad1): conv3d_padding_same()
+      (conv1): Conv3d(8, 16, kernel_size=(1, 4, 4), stride=(1, 1, 1))
+      (norm1): BatchNorm3d(16, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (activation1): LeakyReLU(negative_slope=0.1)
+      (pad2): conv3d_padding_same()
+      (conv2): Conv3d(16, 16, kernel_size=(1, 4, 4), stride=(1, 1, 1))
+      (norm2): BatchNorm3d(16, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (activation2): LeakyReLU(negative_slope=0.1)
+      (max_pooling): MaxPool3d(kernel_size=3, stride=1, padding=0, dilation=1, ceil_mode=False)
+    )
+  )
+  (linear_layers): ModuleList(
+    (0): Dropout(p=0.35973448489278154, inplace=False)
+    (1): Linear(in_features=1048576, out_features=32, bias=True)
+  )
+  (out_layer): Output(
+    in_features=32, out_features=3, bias=True
+    (fc): Linear(in_features=32, out_features=3, bias=True)
+  )
+)
+2024-06-21 12:57:00,536 - INFO: Weight init name: kaiming_uniform.
+2024-06-21 12:57:03,485 - INFO: Number of training iterations per epoch: 29.
+2024-06-21 12:57:03,485 - INFO: Epoch 1/10...
+2024-06-21 12:57:03,485 - INFO: Learning rate: 0.002542355689225227.
+2024-06-21 12:57:03,485 - INFO: Batch size: 32.
+2024-06-21 12:57:03,485 - INFO: Dataset:
+2024-06-21 12:57:03,485 - INFO: Batch size:
+2024-06-21 12:57:03,485 - INFO: Number of workers:
+2024-06-21 12:57:07,064 - INFO: Epoch: 1/10, Batch: 1/29, Batch_Loss_Train: 78.765
+2024-06-21 12:57:07,623 - INFO: Epoch: 1/10, Batch: 2/29, Batch_Loss_Train: 62.098
+2024-06-21 12:57:08,271 - INFO: Epoch: 1/10, Batch: 3/29, Batch_Loss_Train: 70.039
+2024-06-21 12:57:08,843 - INFO: Epoch: 1/10, Batch: 4/29, Batch_Loss_Train: 74.273
+2024-06-21 12:57:09,496 - INFO: Epoch: 1/10, Batch: 5/29, Batch_Loss_Train: 65.409
+2024-06-21 12:57:10,075 - INFO: Epoch: 1/10, Batch: 6/29, Batch_Loss_Train: 79.374
+2024-06-21 12:57:10,718 - INFO: Epoch: 1/10, Batch: 7/29, Batch_Loss_Train: 659.936
+2024-06-21 12:57:11,288 - INFO: Epoch: 1/10, Batch: 8/29, Batch_Loss_Train: 24710180.000
+2024-06-21 12:57:12,128 - INFO: Epoch: 1/10, Batch: 9/29, Batch_Loss_Train: 2228797304897770510985723904.000
+2024-06-21 12:57:12,572 - INFO: Epoch: 1/10, Batch: 10/29, Batch_Loss_Train: nan

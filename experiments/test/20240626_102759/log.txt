@@ -1,0 +1,15 @@
+2024-06-26 10:27:59,214 - INFO: Device: cuda.
+2024-06-26 10:27:59,214 - INFO: Torch version: 2.0.1+cu117.
+2024-06-26 10:27:59,214 - INFO: Torch.backends.cudnn.benchmark: True.
+2024-06-26 10:27:59,215 - INFO: Model name: Dual_DCNN_LReLu
+2024-06-26 10:27:59,215 - INFO: Seed: 4
+2024-06-26 10:27:59,215 - INFO: 42 patients have been found in the data directory.
+2024-06-26 10:27:59,248 - INFO: Train set contains 32 patients.
+2024-06-26 10:27:59,248 - INFO: Val set contains 5 patients.
+2024-06-26 10:27:59,248 - INFO: Test set contains 5 patients.
+2024-06-26 10:27:59,248 - INFO: Fold: 0
+2024-06-26 10:27:59,249 - INFO: Performing 2-fold Cross Validation.
+2024-06-26 10:27:59,250 - INFO: Train Set: 910/1970, percent: 0.462
+2024-06-26 10:27:59,250 - INFO: Val Set: 910/1970, percent: 0.462
+2024-06-26 10:27:59,250 - INFO: Test Set: 150/1970, percent: 0.076
+2024-06-26 10:27:59,371 - INFO: To_device: False.

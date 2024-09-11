@@ -1,0 +1,186 @@
+{
+    "optuna_n_trials": 100,
+    "batch_size_list": [
+        8,
+        16,
+        32,
+        64
+    ],
+    "filters_list": [
+        [
+            16,
+            16,
+            32,
+            32,
+            64
+        ],
+        [
+            8,
+            8,
+            16,
+            32,
+            64
+        ],
+        [
+            16,
+            16,
+            32,
+            64,
+            128
+        ],
+        [
+            16,
+            16,
+            16,
+            32,
+            32
+        ],
+        [
+            8,
+            8,
+            16,
+            16,
+            32
+        ],
+        [
+            8,
+            8,
+            8,
+            16,
+            16
+        ]
+    ],
+    "kernel_size_range": [
+        3,
+        7
+    ],
+    "linear_units_size": [
+        1,
+        2,
+        3
+    ],
+    "linear_units_list": [
+        8,
+        16,
+        32,
+        64
+    ],
+    "dropout_p_j": [
+        0.0,
+        0.5
+    ],
+    "clinical_variables_linear_units_size": [
+        1,
+        2,
+        3
+    ],
+    "clinical_variables_linear_units_list": [
+        8,
+        16,
+        32,
+        64
+    ],
+    "clinical_variables_dropout_p_j": [
+        0.0,
+        0.5
+    ],
+    "features_dl_list": [
+        []
+    ],
+    "optuna_step_size_up": [],
+    "ranges": {
+        "data_aug_strength": [
+            0.0,
+            3.0
+        ],
+        "data_aug_p": [
+            0.9,
+            1.0
+        ],
+        "augmix_strength": [
+            0.0,
+            3.0
+        ],
+        "loss_function_weights_ce": [
+            0.0,
+            1.0
+        ],
+        "loss_function_weights_f1": [
+            0.0,
+            1.0
+        ],
+        "loss_function_weights_dice": [
+            0.0,
+            1.0
+        ],
+        "loss_function_weights_l1": [
+            0.0,
+            1.0
+        ],
+        "loss_function_weights_ranking": [
+            0.0,
+            1.0
+        ],
+        "loss_function_weights_softauc": [
+            0.0,
+            1.0
+        ],
+        "loss_function_name": [
+            "mse_loss",
+            "l1_loss"
+        ],
+        "optimizer_name": [
+            "adam",
+            "rmsprop",
+            "sgd_w",
+            "sgd",
+            "acc_sgd"
+        ],
+        "scheduler_name": [
+            "cyclic",
+            "reduce_lr",
+            "step_lr",
+            "cosine"
+        ],
+        "n_layers": [
+            4,
+            5
+        ],
+        "stride_value_last_layer": [
+            1,
+            2
+        ],
+        "lr": [
+            5e-06,
+            0.001
+        ],
+        "T0_cosine": [
+            8,
+            64
+        ],
+        "gamma": [
+            0.9,
+            1.0
+        ],
+        "use_momentum": [
+            true,
+            false
+        ],
+        "momentum": [
+            0.0,
+            1.0
+        ],
+        "weight_decay": [
+            0.0,
+            0.1
+        ],
+        "label_smoothing": [
+            0.0,
+            0.1
+        ],
+        "T0": [
+            8,
+            64
+        ]
+    }
+}

@@ -1,0 +1,100 @@
+/* styles.css */
+/* Logo */
+[data-testid="stSidebar"] {
+    background-image: url(https://nf1-expertise.net/media/uploads/nl/locations/previews/og/logo_UMCG_transparant2.png?_=1591783184);
+    background-size: 200px;
+    background-repeat: no-repeat;
+    background-position: 20px 10px;
+}
+
+/* Card */
+div.css-1r6slb0.e1tzin5v2 {
+    background-color: #FFFFFF;
+    border: 1px solid #CCCCCC;
+    padding: 5% 5% 5% 10%;
+    border-radius: 5px;
+    border-left: 0.5rem solid #1390a3 !important;
+    box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15) !important;
+}
+
+label.css-mkogse.e16fv1kl2 {
+    color: #36b9cc !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+}
+
+/* Move block container higher */
+div.block-container.css-18e3th9.egzxvld2 {
+    margin-top: -5em;
+}
+
+/* Hide hamburger menu and footer */
+div.css-r698ls.e8zbici2 {
+    display: none;
+}
+
+footer.css-ipbk5a.egzxvld4 {
+    display: none;
+}
+
+footer.css-12gp8ed.eknhn3m4 {
+    display: none;
+}
+
+div.vg-tooltip-element {
+    display: none;
+}
+
+/* Button and Title Styles */
+.stButton button {
+    background-color: #91b8dd; /* Changed to blue */
+    color: black;
+    font-weight: bold;
+    font-size: 26px;
+    height: 3em;
+    width: 100%;
+    border: none; /* Optional: Remove border */
+}
+
+.centered-title {
+    font-size: 50px;
+    font-weight: bold;
+    text-align: center;
+    margin-top: -60px;
+}
+/* Style for sidebar footer */
+.stSidebar {
+    position: relative;
+    height: 100%;
+}
+
+.sidebar-footer {
+    position: absolute;
+    bottom: 200;
+    width: 100%;
+    text-align: center;
+    padding: 10px;
+    font-size: 0.85rem;
+    color: #555;
+    background-color: #f8f9fa;
+    border-top: 1px solid #ccc;
+}
+
+/* Coordination text styling */
+.coord-text {
+    font-size: 16px;
+    font-weight: bold;
+    margin: 0;
+    padding: 5px 0;
+}
+
+
+/* New class for centered and lowered text */
+.centered-lowered-text {
+    text-align: center;
+    margin-top: 200px; /* Adjust the value as needed */
+    font-size: 16px; /* Optional: Adjust the font size */
+    color: #333; /* Optional: Adjust the text color */
+}
+
+

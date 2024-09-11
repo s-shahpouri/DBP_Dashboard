@@ -1,0 +1,20 @@
+2024-06-14 17:45:21,729 - INFO: Device: cpu.
+2024-06-14 17:45:21,729 - INFO: Torch version: 2.3.1+cu121.
+2024-06-14 17:45:21,729 - INFO: Torch.backends.cudnn.benchmark: True.
+2024-06-14 17:45:21,729 - INFO: Model name: Dual_DCNN_LReLu
+2024-06-14 17:45:21,729 - INFO: Seed: 4
+2024-06-14 17:45:21,730 - INFO: 42 patients have been found in the data directory.
+2024-06-14 17:45:21,767 - INFO: Train set contains 23 patients.
+2024-06-14 17:45:21,767 - INFO: Val set contains 14 patients.
+2024-06-14 17:45:21,767 - INFO: Test set contains 5 patients.
+2024-06-14 17:45:21,767 - INFO: Fold: 0
+2024-06-14 17:45:21,768 - INFO: Performing 2-fold Cross Validation.
+2024-06-14 17:45:21,768 - INFO: Train Set: 910/1970, percent: 0.462
+2024-06-14 17:45:21,768 - INFO: Val Set: 910/1970, percent: 0.462
+2024-06-14 17:45:21,768 - INFO: Test Set: 150/1970, percent: 0.076
+2024-06-14 17:45:21,897 - INFO: To_device: False.
+2024-06-14 17:45:21,900 - INFO: Transformers have been made successfully.
+2024-06-14 17:48:34,236 - INFO: Normalization mean: [-5.4718406e-05, 0.0005555182]
+2024-06-14 17:48:34,236 - INFO: Normalization std: [0.8690346, 0.8695489]
+2024-06-14 17:48:34,642 - INFO: Dataset type: cache.
+2024-06-14 17:48:34,642 - INFO: Dataloader type: standard.

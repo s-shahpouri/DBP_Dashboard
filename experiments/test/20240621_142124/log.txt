@@ -1,0 +1,240 @@
+2024-06-21 14:21:24,864 - INFO: Device: cuda.
+2024-06-21 14:21:24,864 - INFO: Torch version: 2.0.1+cu117.
+2024-06-21 14:21:24,864 - INFO: Torch.backends.cudnn.benchmark: True.
+2024-06-21 14:21:24,864 - INFO: Model name: Dual_DCNN_LReLu
+2024-06-21 14:21:24,864 - INFO: Seed: 4
+2024-06-21 14:21:24,864 - INFO: 42 patients have been found in the data directory.
+2024-06-21 14:21:24,903 - INFO: Train set contains 32 patients.
+2024-06-21 14:21:24,903 - INFO: Val set contains 5 patients.
+2024-06-21 14:21:24,903 - INFO: Test set contains 5 patients.
+2024-06-21 14:21:24,903 - INFO: Fold: 0
+2024-06-21 14:21:24,904 - INFO: Performing 2-fold Cross Validation.
+2024-06-21 14:21:24,904 - INFO: Train Set: 910/1970, percent: 0.462
+2024-06-21 14:21:24,905 - INFO: Val Set: 910/1970, percent: 0.462
+2024-06-21 14:21:24,905 - INFO: Test Set: 150/1970, percent: 0.076
+2024-06-21 14:21:25,036 - INFO: To_device: False.
+2024-06-21 14:21:25,038 - INFO: Transformers have been made successfully.
+2024-06-21 14:21:25,038 - INFO: Dataset type: cache.
+2024-06-21 14:21:25,038 - INFO: Dataloader type: standard.
+2024-06-21 14:23:16,539 - INFO: Train dataloader arguments.
+2024-06-21 14:23:16,539 - INFO: 	Batch_size: 32.
+2024-06-21 14:23:16,540 - INFO: 	Shuffle: True.
+2024-06-21 14:23:16,540 - INFO: 	Sampler: None.
+2024-06-21 14:23:16,540 - INFO: 	Num_workers: 4.
+2024-06-21 14:23:16,540 - INFO: 	Drop_last: False.
+2024-06-21 14:23:16,710 - INFO: Dual_DCNN_LReLU(
+  (conv_blocks_fixed): ModuleList(
+    (0): conv_block_two(
+      (pad1): conv3d_padding_same()
+      (conv1): Conv3d(1, 8, kernel_size=(1, 7, 7), stride=(2, 2, 2))
+      (norm1): BatchNorm3d(8, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (activation1): LeakyReLU(negative_slope=0.1)
+      (pad2): conv3d_padding_same()
+      (conv2): Conv3d(8, 8, kernel_size=(1, 7, 7), stride=(1, 1, 1))
+      (norm2): BatchNorm3d(8, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (activation2): LeakyReLU(negative_slope=0.1)
+      (max_pooling): MaxPool3d(kernel_size=3, stride=1, padding=0, dilation=1, ceil_mode=False)
+    )
+    (1): conv_block_two(
+      (pad1): conv3d_padding_same()
+      (conv1): Conv3d(8, 8, kernel_size=(1, 5, 5), stride=(2, 2, 2))
+      (norm1): BatchNorm3d(8, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (activation1): LeakyReLU(negative_slope=0.1)
+      (pad2): conv3d_padding_same()
+      (conv2): Conv3d(8, 8, kernel_size=(1, 5, 5), stride=(1, 1, 1))
+      (norm2): BatchNorm3d(8, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (activation2): LeakyReLU(negative_slope=0.1)
+      (max_pooling): MaxPool3d(kernel_size=3, stride=1, padding=0, dilation=1, ceil_mode=False)
+    )
+    (2): conv_block_two(
+      (pad1): conv3d_padding_same()
+      (conv1): Conv3d(8, 16, kernel_size=(1, 4, 4), stride=(1, 1, 1))
+      (norm1): BatchNorm3d(16, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (activation1): LeakyReLU(negative_slope=0.1)
+      (pad2): conv3d_padding_same()
+      (conv2): Conv3d(16, 16, kernel_size=(1, 4, 4), stride=(1, 1, 1))
+      (norm2): BatchNorm3d(16, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (activation2): LeakyReLU(negative_slope=0.1)
+      (max_pooling): MaxPool3d(kernel_size=3, stride=1, padding=0, dilation=1, ceil_mode=False)
+    )
+  )
+  (conv_blocks_moving): ModuleList(
+    (0): conv_block_two(
+      (pad1): conv3d_padding_same()
+      (conv1): Conv3d(1, 8, kernel_size=(1, 7, 7), stride=(2, 2, 2))
+      (norm1): BatchNorm3d(8, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (activation1): LeakyReLU(negative_slope=0.1)
+      (pad2): conv3d_padding_same()
+      (conv2): Conv3d(8, 8, kernel_size=(1, 7, 7), stride=(1, 1, 1))
+      (norm2): BatchNorm3d(8, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (activation2): LeakyReLU(negative_slope=0.1)
+      (max_pooling): MaxPool3d(kernel_size=3, stride=1, padding=0, dilation=1, ceil_mode=False)
+    )
+    (1): conv_block_two(
+      (pad1): conv3d_padding_same()
+      (conv1): Conv3d(8, 8, kernel_size=(1, 5, 5), stride=(2, 2, 2))
+      (norm1): BatchNorm3d(8, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (activation1): LeakyReLU(negative_slope=0.1)
+      (pad2): conv3d_padding_same()
+      (conv2): Conv3d(8, 8, kernel_size=(1, 5, 5), stride=(1, 1, 1))
+      (norm2): BatchNorm3d(8, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (activation2): LeakyReLU(negative_slope=0.1)
+      (max_pooling): MaxPool3d(kernel_size=3, stride=1, padding=0, dilation=1, ceil_mode=False)
+    )
+    (2): conv_block_two(
+      (pad1): conv3d_padding_same()
+      (conv1): Conv3d(8, 16, kernel_size=(1, 4, 4), stride=(1, 1, 1))
+      (norm1): BatchNorm3d(16, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (activation1): LeakyReLU(negative_slope=0.1)
+      (pad2): conv3d_padding_same()
+      (conv2): Conv3d(16, 16, kernel_size=(1, 4, 4), stride=(1, 1, 1))
+      (norm2): BatchNorm3d(16, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (activation2): LeakyReLU(negative_slope=0.1)
+      (max_pooling): MaxPool3d(kernel_size=3, stride=1, padding=0, dilation=1, ceil_mode=False)
+    )
+  )
+  (linear_layers): ModuleList(
+    (0): Dropout(p=0.35973448489278154, inplace=False)
+    (1): Linear(in_features=1048576, out_features=32, bias=True)
+  )
+  (out_layer): Output(
+    in_features=32, out_features=3, bias=True
+    (fc): Linear(in_features=32, out_features=3, bias=True)
+  )
+)
+2024-06-21 14:23:17,579 - INFO: Weight init name: kaiming_uniform.
+2024-06-21 14:23:20,531 - INFO: Number of training iterations per epoch: 29.
+2024-06-21 14:23:20,531 - INFO: Epoch 1/10...
+2024-06-21 14:23:20,531 - INFO: Learning rate: 6.494273176617634e-05.
+2024-06-21 14:23:20,531 - INFO: Batch size: 32.
+2024-06-21 14:23:20,532 - INFO: Dataset:
+2024-06-21 14:23:20,532 - INFO: Batch size:
+2024-06-21 14:23:20,532 - INFO: Number of workers:
+2024-06-21 14:23:23,970 - INFO: HIIIIIIIIIIIIIIIIIIIIIIIIIII Learning rate: 6.494273176617634e-05
+2024-06-21 14:23:24,039 - INFO: Epoch: 1/10, Batch: 1/29, Batch_Loss_Train: 78.765
+2024-06-21 14:23:24,243 - INFO: HIIIIIIIIIIIIIIIIIIIIIIIIIII Learning rate: 6.494273176617634e-05
+2024-06-21 14:23:24,392 - INFO: Epoch: 1/10, Batch: 2/29, Batch_Loss_Train: 62.102
+2024-06-21 14:23:24,681 - INFO: HIIIIIIIIIIIIIIIIIIIIIIIIIII Learning rate: 6.494273176617634e-05
+2024-06-21 14:23:24,831 - INFO: Epoch: 1/10, Batch: 3/29, Batch_Loss_Train: 69.834
+2024-06-21 14:23:25,043 - INFO: HIIIIIIIIIIIIIIIIIIIIIIIIIII Learning rate: 6.494273176617634e-05
+2024-06-21 14:23:25,192 - INFO: Epoch: 1/10, Batch: 4/29, Batch_Loss_Train: 73.748
+2024-06-21 14:23:25,502 - INFO: HIIIIIIIIIIIIIIIIIIIIIIIIIII Learning rate: 6.494273176617634e-05
+2024-06-21 14:23:25,651 - INFO: Epoch: 1/10, Batch: 5/29, Batch_Loss_Train: 66.002
+2024-06-21 14:23:25,859 - INFO: HIIIIIIIIIIIIIIIIIIIIIIIIIII Learning rate: 6.494273176617634e-05
+2024-06-21 14:23:26,009 - INFO: Epoch: 1/10, Batch: 6/29, Batch_Loss_Train: 71.184
+2024-06-21 14:23:26,293 - INFO: HIIIIIIIIIIIIIIIIIIIIIIIIIII Learning rate: 6.494273176617634e-05
+2024-06-21 14:23:26,442 - INFO: Epoch: 1/10, Batch: 7/29, Batch_Loss_Train: 79.510
+2024-06-21 14:23:26,651 - INFO: HIIIIIIIIIIIIIIIIIIIIIIIIIII Learning rate: 6.494273176617634e-05
+2024-06-21 14:23:26,800 - INFO: Epoch: 1/10, Batch: 8/29, Batch_Loss_Train: 70.454
+2024-06-21 14:23:27,097 - INFO: HIIIIIIIIIIIIIIIIIIIIIIIIIII Learning rate: 6.494273176617634e-05
+2024-06-21 14:23:27,246 - INFO: Epoch: 1/10, Batch: 9/29, Batch_Loss_Train: 76.734
+2024-06-21 14:23:27,448 - INFO: HIIIIIIIIIIIIIIIIIIIIIIIIIII Learning rate: 6.494273176617634e-05
+2024-06-21 14:23:27,597 - INFO: Epoch: 1/10, Batch: 10/29, Batch_Loss_Train: 67.566
+2024-06-21 14:23:27,873 - INFO: HIIIIIIIIIIIIIIIIIIIIIIIIIII Learning rate: 6.494273176617634e-05
+2024-06-21 14:23:28,022 - INFO: Epoch: 1/10, Batch: 11/29, Batch_Loss_Train: 72.808
+2024-06-21 14:23:28,234 - INFO: HIIIIIIIIIIIIIIIIIIIIIIIIIII Learning rate: 6.494273176617634e-05
+2024-06-21 14:23:28,383 - INFO: Epoch: 1/10, Batch: 12/29, Batch_Loss_Train: 83.606
+2024-06-21 14:23:28,695 - INFO: HIIIIIIIIIIIIIIIIIIIIIIIIIII Learning rate: 6.494273176617634e-05
+2024-06-21 14:23:28,845 - INFO: Epoch: 1/10, Batch: 13/29, Batch_Loss_Train: 71.603
+2024-06-21 14:23:29,056 - INFO: HIIIIIIIIIIIIIIIIIIIIIIIIIII Learning rate: 6.494273176617634e-05
+2024-06-21 14:23:29,206 - INFO: Epoch: 1/10, Batch: 14/29, Batch_Loss_Train: 71.489
+2024-06-21 14:23:29,496 - INFO: HIIIIIIIIIIIIIIIIIIIIIIIIIII Learning rate: 6.494273176617634e-05
+2024-06-21 14:23:29,646 - INFO: Epoch: 1/10, Batch: 15/29, Batch_Loss_Train: 78.795
+2024-06-21 14:23:29,856 - INFO: HIIIIIIIIIIIIIIIIIIIIIIIIIII Learning rate: 6.494273176617634e-05
+2024-06-21 14:23:30,006 - INFO: Epoch: 1/10, Batch: 16/29, Batch_Loss_Train: 68.294
+2024-06-21 14:23:30,318 - INFO: HIIIIIIIIIIIIIIIIIIIIIIIIIII Learning rate: 6.494273176617634e-05
+2024-06-21 14:23:30,467 - INFO: Epoch: 1/10, Batch: 17/29, Batch_Loss_Train: 65.869
+2024-06-21 14:23:30,676 - INFO: HIIIIIIIIIIIIIIIIIIIIIIIIIII Learning rate: 6.494273176617634e-05
+2024-06-21 14:23:30,826 - INFO: Epoch: 1/10, Batch: 18/29, Batch_Loss_Train: 68.426
+2024-06-21 14:23:31,107 - INFO: HIIIIIIIIIIIIIIIIIIIIIIIIIII Learning rate: 6.494273176617634e-05
+2024-06-21 14:23:31,256 - INFO: Epoch: 1/10, Batch: 19/29, Batch_Loss_Train: 81.293
+2024-06-21 14:23:31,460 - INFO: HIIIIIIIIIIIIIIIIIIIIIIIIIII Learning rate: 6.494273176617634e-05
+2024-06-21 14:23:31,609 - INFO: Epoch: 1/10, Batch: 20/29, Batch_Loss_Train: 74.371
+2024-06-21 14:23:31,908 - INFO: HIIIIIIIIIIIIIIIIIIIIIIIIIII Learning rate: 6.494273176617634e-05
+2024-06-21 14:23:32,057 - INFO: Epoch: 1/10, Batch: 21/29, Batch_Loss_Train: 87.829
+2024-06-21 14:23:32,265 - INFO: HIIIIIIIIIIIIIIIIIIIIIIIIIII Learning rate: 6.494273176617634e-05
+2024-06-21 14:23:32,415 - INFO: Epoch: 1/10, Batch: 22/29, Batch_Loss_Train: 70.694
+2024-06-21 14:23:32,681 - INFO: HIIIIIIIIIIIIIIIIIIIIIIIIIII Learning rate: 6.494273176617634e-05
+2024-06-21 14:23:32,830 - INFO: Epoch: 1/10, Batch: 23/29, Batch_Loss_Train: 77.201
+2024-06-21 14:23:33,039 - INFO: HIIIIIIIIIIIIIIIIIIIIIIIIIII Learning rate: 6.494273176617634e-05
+2024-06-21 14:23:33,188 - INFO: Epoch: 1/10, Batch: 24/29, Batch_Loss_Train: 65.468
+2024-06-21 14:23:33,480 - INFO: HIIIIIIIIIIIIIIIIIIIIIIIIIII Learning rate: 6.494273176617634e-05
+2024-06-21 14:23:33,629 - INFO: Epoch: 1/10, Batch: 25/29, Batch_Loss_Train: 76.099
+2024-06-21 14:23:33,835 - INFO: HIIIIIIIIIIIIIIIIIIIIIIIIIII Learning rate: 6.494273176617634e-05
+2024-06-21 14:23:33,985 - INFO: Epoch: 1/10, Batch: 26/29, Batch_Loss_Train: 79.964
+2024-06-21 14:23:34,259 - INFO: HIIIIIIIIIIIIIIIIIIIIIIIIIII Learning rate: 6.494273176617634e-05
+2024-06-21 14:23:34,408 - INFO: Epoch: 1/10, Batch: 27/29, Batch_Loss_Train: 73.775
+2024-06-21 14:23:34,616 - INFO: HIIIIIIIIIIIIIIIIIIIIIIIIIII Learning rate: 6.494273176617634e-05
+2024-06-21 14:23:34,766 - INFO: Epoch: 1/10, Batch: 28/29, Batch_Loss_Train: 83.984
+2024-06-21 14:23:36,505 - INFO: HIIIIIIIIIIIIIIIIIIIIIIIIIII Learning rate: 6.494273176617634e-05
+2024-06-21 14:23:36,535 - INFO: Epoch: 1/10, Batch: 29/29, Batch_Loss_Train: 62.943
+2024-06-21 14:23:47,600 - INFO: 1/10 final results:
+2024-06-21 14:23:47,600 - INFO: Training loss: 73.462.
+2024-06-21 14:23:47,601 - INFO: Training MAE: 7.419.
+2024-06-21 14:23:47,601 - INFO: Training MSE: 73.671.
+2024-06-21 14:24:08,128 - INFO: Epoch: 1/10, Loss_train: 73.46242391652075, Loss_val: 74.14749566439924
+2024-06-21 14:24:08,128 - INFO: Best internal validation val_loss: inf at epoch: 0.
+2024-06-21 14:24:08,128 - INFO: Epoch 2/10...
+2024-06-21 14:24:08,128 - INFO: Learning rate: 6.494273176617634e-05.
+2024-06-21 14:24:08,128 - INFO: Batch size: 32.
+2024-06-21 14:24:08,130 - INFO: Dataset:
+2024-06-21 14:24:08,131 - INFO: Batch size:
+2024-06-21 14:24:08,131 - INFO: Number of workers:
+2024-06-21 14:24:09,145 - INFO: HIIIIIIIIIIIIIIIIIIIIIIIIIII Learning rate: 6.494273176617634e-05
+2024-06-21 14:24:09,294 - INFO: Epoch: 2/10, Batch: 1/29, Batch_Loss_Train: 74.720
+2024-06-21 14:24:09,496 - INFO: HIIIIIIIIIIIIIIIIIIIIIIIIIII Learning rate: 6.494273176617634e-05
+2024-06-21 14:24:09,645 - INFO: Epoch: 2/10, Batch: 2/29, Batch_Loss_Train: 76.970
+2024-06-21 14:24:09,945 - INFO: HIIIIIIIIIIIIIIIIIIIIIIIIIII Learning rate: 6.494273176617634e-05
+2024-06-21 14:24:10,095 - INFO: Epoch: 2/10, Batch: 3/29, Batch_Loss_Train: 67.265
+2024-06-21 14:24:10,309 - INFO: HIIIIIIIIIIIIIIIIIIIIIIIIIII Learning rate: 6.494273176617634e-05
+2024-06-21 14:24:10,458 - INFO: Epoch: 2/10, Batch: 4/29, Batch_Loss_Train: 68.109
+2024-06-21 14:24:10,760 - INFO: HIIIIIIIIIIIIIIIIIIIIIIIIIII Learning rate: 6.494273176617634e-05
+2024-06-21 14:24:10,909 - INFO: Epoch: 2/10, Batch: 5/29, Batch_Loss_Train: 75.770
+2024-06-21 14:24:11,109 - INFO: HIIIIIIIIIIIIIIIIIIIIIIIIIII Learning rate: 6.494273176617634e-05
+2024-06-21 14:24:11,258 - INFO: Epoch: 2/10, Batch: 6/29, Batch_Loss_Train: 68.966
+2024-06-21 14:24:11,554 - INFO: HIIIIIIIIIIIIIIIIIIIIIIIIIII Learning rate: 6.494273176617634e-05
+2024-06-21 14:24:11,704 - INFO: Epoch: 2/10, Batch: 7/29, Batch_Loss_Train: 69.416
+2024-06-21 14:24:11,917 - INFO: HIIIIIIIIIIIIIIIIIIIIIIIIIII Learning rate: 6.494273176617634e-05
+2024-06-21 14:24:12,067 - INFO: Epoch: 2/10, Batch: 8/29, Batch_Loss_Train: 77.805
+2024-06-21 14:24:12,374 - INFO: HIIIIIIIIIIIIIIIIIIIIIIIIIII Learning rate: 6.494273176617634e-05
+2024-06-21 14:24:12,524 - INFO: Epoch: 2/10, Batch: 9/29, Batch_Loss_Train: 83.139
+2024-06-21 14:24:12,716 - INFO: HIIIIIIIIIIIIIIIIIIIIIIIIIII Learning rate: 6.494273176617634e-05
+2024-06-21 14:24:12,865 - INFO: Epoch: 2/10, Batch: 10/29, Batch_Loss_Train: 55.472
+2024-06-21 14:24:13,153 - INFO: HIIIIIIIIIIIIIIIIIIIIIIIIIII Learning rate: 6.494273176617634e-05
+2024-06-21 14:24:13,302 - INFO: Epoch: 2/10, Batch: 11/29, Batch_Loss_Train: 81.376
+2024-06-21 14:24:13,515 - INFO: HIIIIIIIIIIIIIIIIIIIIIIIIIII Learning rate: 6.494273176617634e-05
+2024-06-21 14:24:13,665 - INFO: Epoch: 2/10, Batch: 12/29, Batch_Loss_Train: 70.805
+2024-06-21 14:24:13,968 - INFO: HIIIIIIIIIIIIIIIIIIIIIIIIIII Learning rate: 6.494273176617634e-05
+2024-06-21 14:24:14,117 - INFO: Epoch: 2/10, Batch: 13/29, Batch_Loss_Train: 71.471
+2024-06-21 14:24:14,323 - INFO: HIIIIIIIIIIIIIIIIIIIIIIIIIII Learning rate: 6.494273176617634e-05
+2024-06-21 14:24:14,473 - INFO: Epoch: 2/10, Batch: 14/29, Batch_Loss_Train: 74.283
+2024-06-21 14:24:14,760 - INFO: HIIIIIIIIIIIIIIIIIIIIIIIIIII Learning rate: 6.494273176617634e-05
+2024-06-21 14:24:14,909 - INFO: Epoch: 2/10, Batch: 15/29, Batch_Loss_Train: 81.029
+2024-06-21 14:24:15,121 - INFO: HIIIIIIIIIIIIIIIIIIIIIIIIIII Learning rate: 6.494273176617634e-05
+2024-06-21 14:24:15,271 - INFO: Epoch: 2/10, Batch: 16/29, Batch_Loss_Train: 73.249
+2024-06-21 14:24:15,588 - INFO: HIIIIIIIIIIIIIIIIIIIIIIIIIII Learning rate: 6.494273176617634e-05
+2024-06-21 14:24:15,738 - INFO: Epoch: 2/10, Batch: 17/29, Batch_Loss_Train: 74.989
+2024-06-21 14:24:15,936 - INFO: HIIIIIIIIIIIIIIIIIIIIIIIIIII Learning rate: 6.494273176617634e-05
+2024-06-21 14:24:16,085 - INFO: Epoch: 2/10, Batch: 18/29, Batch_Loss_Train: 75.578
+2024-06-21 14:24:16,380 - INFO: HIIIIIIIIIIIIIIIIIIIIIIIIIII Learning rate: 6.494273176617634e-05
+2024-06-21 14:24:16,529 - INFO: Epoch: 2/10, Batch: 19/29, Batch_Loss_Train: 60.972
+2024-06-21 14:24:16,739 - INFO: HIIIIIIIIIIIIIIIIIIIIIIIIIII Learning rate: 6.494273176617634e-05
+2024-06-21 14:24:16,888 - INFO: Epoch: 2/10, Batch: 20/29, Batch_Loss_Train: 93.981
+2024-06-21 14:24:17,197 - INFO: HIIIIIIIIIIIIIIIIIIIIIIIIIII Learning rate: 6.494273176617634e-05
+2024-06-21 14:24:17,346 - INFO: Epoch: 2/10, Batch: 21/29, Batch_Loss_Train: 65.604
+2024-06-21 14:24:17,545 - INFO: HIIIIIIIIIIIIIIIIIIIIIIIIIII Learning rate: 6.494273176617634e-05
+2024-06-21 14:24:17,695 - INFO: Epoch: 2/10, Batch: 22/29, Batch_Loss_Train: 83.179
+2024-06-21 14:24:17,991 - INFO: HIIIIIIIIIIIIIIIIIIIIIIIIIII Learning rate: 6.494273176617634e-05
+2024-06-21 14:24:18,141 - INFO: Epoch: 2/10, Batch: 23/29, Batch_Loss_Train: 70.818
+2024-06-21 14:24:18,348 - INFO: HIIIIIIIIIIIIIIIIIIIIIIIIIII Learning rate: 6.494273176617634e-05
+2024-06-21 14:24:18,497 - INFO: Epoch: 2/10, Batch: 24/29, Batch_Loss_Train: 67.317
+2024-06-21 14:24:18,804 - INFO: HIIIIIIIIIIIIIIIIIIIIIIIIIII Learning rate: 6.494273176617634e-05
+2024-06-21 14:24:18,953 - INFO: Epoch: 2/10, Batch: 25/29, Batch_Loss_Train: 75.023
+2024-06-21 14:24:19,151 - INFO: HIIIIIIIIIIIIIIIIIIIIIIIIIII Learning rate: 6.494273176617634e-05
+2024-06-21 14:24:19,301 - INFO: Epoch: 2/10, Batch: 26/29, Batch_Loss_Train: 82.716
+2024-06-21 14:24:19,599 - INFO: HIIIIIIIIIIIIIIIIIIIIIIIIIII Learning rate: 6.494273176617634e-05
+2024-06-21 14:24:19,749 - INFO: Epoch: 2/10, Batch: 27/29, Batch_Loss_Train: 76.628
+2024-06-21 14:24:19,960 - INFO: HIIIIIIIIIIIIIIIIIIIIIIIIIII Learning rate: 6.494273176617634e-05
+2024-06-21 14:24:20,110 - INFO: Epoch: 2/10, Batch: 28/29, Batch_Loss_Train: 69.123
+2024-06-21 14:24:20,286 - INFO: HIIIIIIIIIIIIIIIIIIIIIIIIIII Learning rate: 6.494273176617634e-05
+2024-06-21 14:24:20,358 - INFO: Epoch: 2/10, Batch: 29/29, Batch_Loss_Train: 66.437
