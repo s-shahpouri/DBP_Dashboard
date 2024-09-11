@@ -257,6 +257,69 @@ def plot_interactive_boxplots_with_outliers(df_test):
 # fig.show()
 
 
+@ st.cache_data
+def plot_ensemble(df_test):
+    N = 22
+    
+    # Generate an array of rainbow colors
+    colors = ['hsl('+str(h)+',50%'+',50%)' for h in np.linspace(0, 360, N)]
+
+    # Create subplots
+    fig = make_subplots(rows=1, cols=6, subplot_titles=[
+        'ΔX', 'ΔY', 'ΔZ', 'ΔR', 'L1', 'L2'
+    ])
+
+    # Add strip plots (scatter plots) for all points with manual jitter
+    jitter_amount = 0.1
+    fig.add_trace(go.Scatter(
+        x=np.random.normal(1, jitter_amount, size=len(df_test['0_dis'])),
+        y=df_test['0_dis'], mode='markers', name='All Points (0_dis)', 
+        marker=dict(color=colors[0], size=5, opacity=0.5)), row=1, col=1)
+    fig.add_trace(go.Scatter(
+        x=np.random.normal(2, jitter_amount, size=len(df_test['1_dis'])),
+        y=df_test['1_dis'], mode='markers', name='All Points (1_dis)', 
+        marker=dict(color=colors[4], size=5, opacity=0.5)), row=1, col=2)
+    fig.add_trace(go.Scatter(
+        x=np.random.normal(3, jitter_amount, size=len(df_test['2_dis'])),
+        y=df_test['2_dis'], mode='markers', name='All Points (2_dis)', 
+        marker=dict(color=colors[8], size=5, opacity=0.5)), row=1, col=3)
+    fig.add_trace(go.Scatter(
+        x=np.random.normal(4, jitter_amount, size=len(df_test['Euc_dis'])),
+        y=df_test['Euc_dis'], mode='markers', name='All Points (Euc_dis)', 
+        marker=dict(color=colors[12], size=5, opacity=0.5)), row=1, col=4)
+    fig.add_trace(go.Scatter(
+        x=np.random.normal(5, jitter_amount, size=len(df_test['L1_dis'])),
+        y=df_test['L1_dis'], mode='markers', name='All Points (L1_dis)', 
+        marker=dict(color=colors[16], size=5, opacity=0.5)), row=1, col=5)
+    fig.add_trace(go.Scatter(
+        x=np.random.normal(6, jitter_amount, size=len(df_test['L2_dis'])),
+        y=df_test['L2_dis'], mode='markers', name='All Points (L2_dis)', 
+        marker=dict(color=colors[18], size=5, opacity=0.5)), row=1, col=6)
+
+    # Add box plots for suspected outliers using different colors
+    fig.add_trace(go.Box(y=df_test['0_dis'], name='Box (0_dis)', boxpoints='suspectedoutliers',
+                         marker=dict(color=colors[0]), boxmean=True), row=1, col=1)
+    fig.add_trace(go.Box(y=df_test['1_dis'], name='Box (1_dis)', boxpoints='suspectedoutliers',
+                         marker=dict(color=colors[4]), boxmean=True), row=1, col=2)
+    fig.add_trace(go.Box(y=df_test['2_dis'], name='Box (2_dis)', boxpoints='suspectedoutliers',
+                         marker=dict(color=colors[8]), boxmean=True), row=1, col=3)
+    fig.add_trace(go.Box(y=df_test['Euc_dis'], name='Box (Euc_dis)', boxpoints='suspectedoutliers',
+                         marker=dict(color=colors[12]), boxmean=True), row=1, col=4)
+    fig.add_trace(go.Box(y=df_test['L1_dis'], name='Box (L1_dis)', boxpoints='suspectedoutliers',
+                         marker=dict(color=colors[16]), boxmean=True), row=1, col=5)
+    fig.add_trace(go.Box(y=df_test['L2_dis'], name='Box (L2_dis)', boxpoints='suspectedoutliers',
+                         marker=dict(color=colors[18]), boxmean=True), row=1, col=6)
+
+    # Update layout for aesthetics
+    fig.update_layout(height=600, width=1600,
+                      showlegend=False)
+    fig.update_xaxes(showticklabels=False)
+    return fig
+# # Example usage:
+# fig = plot_interactive_boxplots_with_outliers(df_test, outliers_df)
+# fig.show()
+
+
 
 def transform_moving_ct(moving_CT_image, fixed_CT_image, coordination, pixdim):
     if len(coordination) != 3:
