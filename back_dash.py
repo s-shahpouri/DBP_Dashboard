@@ -70,12 +70,12 @@ class BackDash:
     def process_ensemble(self, df_cleaned):
         """Process the ensemble approach and generate df_best_esms."""
 
-        # print("0000000000")
-        # print(df_cleaned.head())
+        print("0000000000")
+        print(df_cleaned.head())
         # Create df_ensemble
         df_ensemble = keep_lowest_ensemble_losses(df_cleaned)
-        # print("11111111111111")
-        # print(df_ensemble)
+        print("11111111111111")
+        print(df_ensemble)
         # Step 1: Identify rows with 'Best_Esmb_X' in the tag
         best_esmb_rows = df_ensemble[df_ensemble['tag'].str.startswith('Esb_')]
 
@@ -84,13 +84,13 @@ class BackDash:
 
         # Step 3: Filter the DataFrame to keep all rows that share the same 'esm' as the best rows
         df_best_esms = df_cleaned[df_cleaned['esm'].isin(best_esm_values)]
-        # print("2222222222222222")
-        # print(df_best_esms.head())
+        print("2222222222222222")
+        print(df_best_esms.head())
         # Attach CSV outputs
         df_best_esms = df_best_esms.apply(lambda row: attach_csv_outputs(self.main_root, row), axis=1)
         df_best_esms = df_best_esms.reset_index(drop=True)
-        # print("3333333333333333")
-        # print(df_best_esms.head())
+        print("3333333333333333")
+        print(df_best_esms.head())
         df_best_esms = df_best_esms.apply(lambda row: attach_data_dict_paths(self.main_root, row), axis=1)
         print("4444444444444")
         print(df_best_esms)

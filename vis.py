@@ -196,6 +196,8 @@ import numpy as np
 
 @ st.cache_data
 def plot_interactive_boxplots_with_outliers(df_test):
+    print("@@@@@@@@@@@@@@")
+    print(df_test.head())
     N = 22
     
     # Generate an array of rainbow colors
@@ -259,6 +261,8 @@ def plot_interactive_boxplots_with_outliers(df_test):
 
 @ st.cache_data
 def plot_ensemble(df_test):
+    print("@@@@@@@@@@@@@@")
+    print(df_test.head())
     N = 22
     
     # Generate an array of rainbow colors
@@ -315,12 +319,36 @@ def plot_ensemble(df_test):
                       showlegend=False)
     fig.update_xaxes(showticklabels=False)
     return fig
-# # Example usage:
-# fig = plot_interactive_boxplots_with_outliers(df_test, outliers_df)
-# fig.show()
 
 
+# Function for plotting individual plots
+def plot_single(df_test, column_name, title):
+    fig = make_subplots(rows=1, cols=1, subplot_titles=[title])
+    jitter_amount = 0.1
+    fig.add_trace(go.Scatter(
+        x=np.random.normal(1, jitter_amount, size=len(df_test[column_name])),
+        y=df_test[column_name], mode='markers', 
+        marker=dict(color='blue', size=5, opacity=0.5)
+    ))
 
+    fig.add_trace(go.Box(y=df_test[column_name], boxpoints='suspectedoutliers', boxmean=True))
+
+    fig.update_layout(height=600, width=200, showlegend=False)
+    return fig
+
+def plot_side_by_side(df1, df2, column_name, title1, title2):
+    fig = make_subplots(rows=1, cols=2, subplot_titles=[title1, title2])
+
+    # Add the first box plot from df1
+    fig.add_trace(go.Box(y=df1[column_name], name=title1, boxpoints='suspectedoutliers', boxmean=True), row=1, col=1)
+
+    # Add the second box plot from df2
+    fig.add_trace(go.Box(y=df2[column_name], name=title2, boxpoints='suspectedoutliers', boxmean=True), row=1, col=2)
+    fig.update_yaxes(matches='y')
+    fig.update_layout(height=600, width=800, showlegend=False)
+    return fig
+
+    
 def transform_moving_ct(moving_CT_image, fixed_CT_image, coordination, pixdim):
     if len(coordination) != 3:
         raise ValueError(f"Expected coordination of length 3, but got {len(coordination)}")

@@ -4,7 +4,7 @@ from plotly.subplots import make_subplots
 from vis import read_from_pickle, plot_interactive_boxplots_with_outliers, find_outliers, making_array, plot_img, plot_colored_wordcloud
 import pandas as pd
 import numpy as np
-from vis import DataProcessor, display_coordination_info,plot_ensemble, load_css
+from vis import DataProcessor, display_coordination_info,plot_ensemble, plot_single, plot_side_by_side, load_css
 import matplotlib.pyplot as plt
 import pickle
 import os
@@ -20,6 +20,7 @@ from vis import calculate_ensemble_average, plot_ensemble_average_boxplots
 from back_dash import BackDash
 
 
+
 # Set page config
 st.set_page_config(layout='wide', initial_sidebar_state='expanded')
 
@@ -29,23 +30,14 @@ st.markdown("<div class='centered-title' style='color:#04028b;'>DBP Dashboard</d
 
 # Call the function to load the CSS
 load_css("style.css")
-main_root='/data/sama/experiments_dose/test'
 
-back_dash = BackDash(main_root)
-df_cleaned = back_dash.process()
-
-df_best_esms = back_dash.process_ensemble(df_cleaned)
-back_dash.save_ensemble_pickle(df_best_esms, 'df_best_esms.pkl')
-
-# Or generate df_single for the single approach
-df_single = back_dash.process_single(df_cleaned)
-back_dash.save_ensemble_pickle(df_single, 'df_single.pkl')
-
+ensemble_data_path = '/data/sama/Datasets/Dash_data/df_best_esms.pkl'
+single_data_path = '/data/sama/Datasets/Dash_data/df_single.pkl'
 
 # Define the paths to the pickle files
 pickle_files = {
-    "Ensemble": 'df_best_esms.pkl',
-    "Single": 'df_single.pkl'  # Add your second pickle file here
+    "Ensemble": ensemble_data_path,
+    "Single": single_data_path
 }
 
 df_filtered_tagged_losses = None  # Initialize df_filtered_tagged_losses as None
@@ -54,7 +46,19 @@ df_filtered_tagged_losses = None  # Initialize df_filtered_tagged_losses as None
 with st.sidebar:
     st.sidebar.markdown("<div style='height: 50px;'></div>", unsafe_allow_html=True)
 
-    main_root = st.text_input("Directory ↘️ ", main_root)
+    main_root = st.text_input("Directory ↘️ ", '/data/sama/Test_data')
+
+    back_dash = BackDash(main_root)
+    df_cleaned = back_dash.process()
+
+    df_best_esms = back_dash.process_ensemble(df_cleaned)
+    back_dash.save_ensemble_pickle(df_best_esms, ensemble_data_path)
+
+    # Or generate df_single for the single approach
+    df_single = back_dash.process_single(df_cleaned)
+    back_dash.save_ensemble_pickle(df_single, single_data_path)
+
+
 
     # Radio button for selecting the pickle file or folder
     selected_pickle = st.radio("Evaluation Approaches", list(pickle_files.keys()) + ["Select another Folder"])
@@ -83,7 +87,8 @@ with st.sidebar:
         if selected_pickle == "Ensemble":
             # df_filtered_tagged_losses = main_df
             df_filtered_tagged_losses = main_df.iloc[:-1]
-            # print(main_df.head())
+            df_avg = main_df.iloc[-1]
+            print(df_avg.head())
         else:
             df_filtered_tagged_losses = main_df
 
@@ -97,24 +102,12 @@ with st.sidebar:
     selected_row = df_filtered_tagged_losses[df_filtered_tagged_losses['tag'] == selected_tag].iloc[0]
 
     # Dropdown for selecting dataset mode (Test, Val, or Train)
-    dataset_option = st.sidebar.selectbox("Select Mode", options=['Test', 'Val', 'Train'])
+    mode = st.sidebar.selectbox("Select Mode", options=['test', 'val', 'train'])
 
-    # Extract the relevant DataFrame from the pickle file based on the user's selection
-    if dataset_option == 'Test':
-        df = read_from_pickle(selected_row['test_output'])
-    elif dataset_option == 'Val':
-        df = read_from_pickle(selected_row['val_output'])
-    else:
-        df = read_from_pickle(selected_row['train_output'])
+    
+    df = read_from_pickle(selected_row[f'{mode}_output'])
+    data_dict = selected_row[f'{mode}_dict']
 
-
-    # Extract the relevant dictionary from the selected row
-    if dataset_option == 'Test':
-        data_dict = selected_row['test_dict']
-    elif dataset_option == 'Val':
-        data_dict = selected_row['val_dict']
-    else:
-        data_dict = selected_row['train_dict']
 
     # Initialize the DataProcessor and PathName
     data_processor = DataProcessor(data_dict)
@@ -245,29 +238,99 @@ with tab1:
         plot_colored_wordcloud(max_diff_map[axis_options[selected_axis]], f'Max Differences ({selected_axis})')
 
 with tab2:
-    # Use columns with specific ratios for better spacing
-    col1, col2 = st.columns([5, 1])
+    if selected_pickle == "Ensemble":
+        df_ensembled = read_from_pickle(df_avg[f'{mode}_output'])
+        # Create columns for the radio buttons to arrange them horizontally
+        col1, col2, col3, col4, col5, col6, col7 , col8 = st.columns(8)
 
-    with col1:      
-        if selected_pickle == "Ensemble":
+        # Create a placeholder for the selected option
+        plot_option = None
 
-            ensemble_df = main_df.iloc[-1]
-            print(ensemble_df.head())
-            fig = plot_ensemble(df)
-            st.plotly_chart(fig, use_container_width=True)
+        # Assign each button to a separate column and plot in the same column
+        with col1:
 
-        else:
+            if st.button("ΔX"):
+                plot_option = "ΔX"
+                selected_column = '0_dis'
+                fig = plot_side_by_side(df, df_ensembled, selected_column, plot_option, "Avg")
+                st.plotly_chart(fig, use_container_width=True)
+        with col2:
+            if st.button("ΔY"):
+                plot_option = "ΔY"
+                selected_column = '1_dis'
+                fig = plot_side_by_side(df, df_ensembled, selected_column, plot_option, "Avg")
+                st.plotly_chart(fig, use_container_width=True)
+        
+        with col3:
+            if st.button("ΔZ"):
+                plot_option = "ΔZ"
+                selected_column = '2_dis'
+                fig = plot_side_by_side(df, df_ensembled, selected_column, plot_option, "Avg")
+                st.plotly_chart(fig, use_container_width=True)
+        
+        with col4:
+            if st.button("ΔR"):
+                plot_option = "ΔR"
+                selected_column = 'Euc_dis'
+                fig = plot_side_by_side(df, df_ensembled, selected_column, plot_option, "Avg")
+                st.plotly_chart(fig, use_container_width=True)
+        
+        with col5:
+            if st.button("L1"):
+                plot_option = "L1"
+                selected_column = 'L1_dis'
+                fig = plot_side_by_side(df, df_ensembled, selected_column, plot_option, "Avg")
+                st.plotly_chart(fig, use_container_width=True)
+        
+        with col6:
+            if st.button("L2"):
+                plot_option = "L2"
+                selected_column = 'L2_dis'
+                fig = plot_side_by_side(df, df_ensembled, selected_column, plot_option, "Avg")
+                st.plotly_chart(fig, use_container_width=True)
+        
+        with col7:
+            if st.button("All Plots"):
+                plot_option = "All Plots"
+
+        # If "All Plots" is selected, display the full ensemble plot below the buttons
+        if plot_option == "All Plots":
+            # Display the full ensemble plot across the entire width of the screen
             fig = plot_interactive_boxplots_with_outliers(df)
             st.plotly_chart(fig, use_container_width=True)
 
-    st.divider()
-    # Display each formulation using LaTeX formatting
-    # st.latex(r"\Delta_X = pred_0 - true_0")
-    # st.latex(r"\Delta_Y = pred_1 - true_1")
-    # st.latex(r"\Delta_Z = pred_2 - true_2")
-    # st.latex(r"Euc\_dis = \sqrt{(\Delta_0)^2 + (\Delta_1)^2 + (\Delta_2)^2}")
-    # st.latex(r"L1 = |\Delta_x| + |\Delta_y| + |\Delta_z|")
-    # st.latex(r"L2 = \sqrt{(\Delta_x^2 + \Delta_y^2 + \Delta_z^2)}")
+        with col8:
+            if st.button("AVG Plots"):
+                plot_option = "AVG Plots"
+
+        # If "All Plots" is selected, display the full ensemble plot below the buttons
+        if plot_option == "AVG Plots":
+            # Display the full ensemble plot across the entire width of the screen
+            fig = plot_ensemble(df_ensembled)
+            st.plotly_chart(fig, use_container_width=True)
+
+        # with col1:      
+        #     if selected_pickle == "Ensemble":
+                
+        #         df_ensembled = read_from_pickle(df_avg[f'{mode}_output'])
+
+
+
+        #         fig = plot_ensemble(df_ensembled)
+        #         st.plotly_chart(fig, use_container_width=True)
+
+    else:
+        fig = plot_interactive_boxplots_with_outliers(df)
+        st.plotly_chart(fig, use_container_width=True)
+
+        st.divider()
+        # Display each formulation using LaTeX formatting
+        # st.latex(r"\Delta_X = pred_0 - true_0")
+        # st.latex(r"\Delta_Y = pred_1 - true_1")
+        # st.latex(r"\Delta_Z = pred_2 - true_2")
+        # st.latex(r"Euc\_dis = \sqrt{(\Delta_0)^2 + (\Delta_1)^2 + (\Delta_2)^2}")
+        # st.latex(r"L1 = |\Delta_x| + |\Delta_y| + |\Delta_z|")
+        # st.latex(r"L2 = \sqrt{(\Delta_x^2 + \Delta_y^2 + \Delta_z^2)}")
 
 
 with tab3:

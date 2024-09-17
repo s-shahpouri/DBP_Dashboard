@@ -300,51 +300,44 @@ def keep_lowest_single_losses(df):
 
 
 def keep_lowest_ensemble_losses(df_losses):
-    # Drop rows with any NaN in avg_train_loss, avg_val_loss, or avg_test_loss to ensure we're comparing valid rows
-
     # Add 'tag' column for marking rows
-    df_losses['tag'] = 'Other'
+    df_losses['tag'] = 'Other'  # Default tag
+
+    # Ensure we drop rows where avg losses are NaN for valid comparisons
+    df_losses_clean = df_losses.dropna(subset=['avg_train_loss', 'avg_val_loss', 'avg_test_loss'], how='all')
 
     # # Tagging the row with the lowest avg train loss
-    # lowest_avg_train_idx = df_losses['avg_train_loss'].idxmin()
-    # df_losses.loc[lowest_avg_train_idx, 'tag'] = (
-    #     f"Esb_Train: [{df_losses.loc[lowest_avg_train_idx, 'avg_train_loss']}, "
-    #     f"{df_losses.loc[lowest_avg_train_idx, 'avg_val_loss']}, "
-    #     f"{df_losses.loc[lowest_avg_train_idx, 'avg_test_loss']}]"
-    # )
+    # if not df_losses_clean['avg_train_loss'].isnull().all():
+    #     lowest_avg_train_idx = df_losses_clean['avg_train_loss'].idxmin()
+    #     df_losses.loc[lowest_avg_train_idx, 'tag'] = (
+    #         f"Esb_Train: [{df_losses.loc[lowest_avg_train_idx, 'avg_train_loss']}, "
+    #         f"{df_losses.loc[lowest_avg_train_idx, 'avg_val_loss']}, "
+    #         f"{df_losses.loc[lowest_avg_train_idx, 'avg_test_loss']}]"
+    #     )
 
     # # Tagging the row with the lowest avg validation loss
-    # lowest_avg_val_idx = df_losses['avg_val_loss'].idxmin()
-    # df_losses.loc[lowest_avg_val_idx, 'tag'] = (
-    #     f"Esb_Val: [{df_losses.loc[lowest_avg_val_idx, 'avg_train_loss']}, "
-    #     f"{df_losses.loc[lowest_avg_val_idx, 'avg_val_loss']}, "
-    #     f"{df_losses.loc[lowest_avg_val_idx, 'avg_test_loss']}]"
-    # )
+    # if not df_losses_clean['avg_val_loss'].isnull().all():
+    #     lowest_avg_val_idx = df_losses_clean['avg_val_loss'].idxmin()
+    #     df_losses.loc[lowest_avg_val_idx, 'tag'] = (
+    #         f"Esb_Val: [{df_losses.loc[lowest_avg_val_idx, 'avg_train_loss']}, "
+    #         f"{df_losses.loc[lowest_avg_val_idx, 'avg_val_loss']}, "
+    #         f"{df_losses.loc[lowest_avg_val_idx, 'avg_test_loss']}]"
+    #     )
 
     # Tagging the row with the lowest avg test loss
-    lowest_avg_test_idx = df_losses['avg_test_loss'].idxmin()
+    
+    lowest_avg_test_idx = df_losses_clean['avg_test_loss'].idxmin()
     df_losses.loc[lowest_avg_test_idx, 'tag'] = (
-        f"Esb_Test: [{df_losses.loc[lowest_avg_test_idx, 'avg_train_loss']}, "
-        f"{df_losses.loc[lowest_avg_test_idx, 'avg_val_loss']}, "
-        f"{df_losses.loc[lowest_avg_test_idx, 'avg_test_loss']}]"
-    )
+            f"Esb_Test: [{df_losses.loc[lowest_avg_test_idx, 'avg_train_loss']}, "
+            f"{df_losses.loc[lowest_avg_test_idx, 'avg_val_loss']}, "
+            f"{df_losses.loc[lowest_avg_test_idx, 'avg_test_loss']}]"
+        )
 
-    # Find the index for the row with the lowest train loss
-    lowest_train_idx = df_losses['train_loss'].idxmin()
+    # Now we return only the rows that were tagged with Esb_Train, Esb_Val, or Esb_Test
+    tagged_df = df_losses[df_losses['tag'] != 'Other'].drop_duplicates()
 
-    # Find the index for the row with the lowest validation loss
-    lowest_val_idx = df_losses['val_loss'].idxmin()
+    return tagged_df  # Return DataFrame with only the lowest losses
 
-    # Find the index for the row with the lowest test loss
-    lowest_test_idx = df_losses['test_loss'].idxmin()
-
-    # Extract the rows with the lowest losses for train, val, and test
-    lowest_losses_df = df_losses.loc[[lowest_train_idx, lowest_val_idx, lowest_test_idx]]
-
-    # Drop duplicates if the same row has the lowest loss for multiple metrics
-    lowest_losses_df = lowest_losses_df.drop_duplicates()
-
-    return lowest_losses_df
 
 
 
