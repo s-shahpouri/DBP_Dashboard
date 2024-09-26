@@ -252,6 +252,22 @@ def plot_interactive_boxplots_with_outliers(df_test):
     # Update layout for aesthetics
     fig.update_layout(height=600, width=1600,
                       showlegend=False)
+
+    max_abs_value = max(abs(df_test[['0_dis', '1_dis', '2_dis', 'Euc_dis', 'L1_dis']].max().max()),
+                    abs(df_test[['0_dis', '1_dis', '2_dis', 'Euc_dis', 'L1_dis']].min().min()))
+
+
+    y_axis_range = [-max_abs_value * 1.0, max_abs_value * 1.3]
+
+    # Set common y-axis range for all subplots
+    fig.update_yaxes(range=y_axis_range, row=1, col=1)
+    fig.update_yaxes(range=y_axis_range, row=1, col=2)
+    fig.update_yaxes(range=y_axis_range, row=1, col=3)
+    fig.update_yaxes(range=y_axis_range, row=1, col=4)
+    fig.update_yaxes(range=y_axis_range, row=1, col=5)
+
+
+
     fig.update_xaxes(showticklabels=False)
     return fig
 # # Example usage:
@@ -261,8 +277,7 @@ def plot_interactive_boxplots_with_outliers(df_test):
 
 @ st.cache_data
 def plot_ensemble(df_test):
-    print("@@@@@@@@@@@@@@")
-    print(df_test.head())
+
     N = 22
     
     # Generate an array of rainbow colors
@@ -317,6 +332,19 @@ def plot_ensemble(df_test):
     # Update layout for aesthetics
     fig.update_layout(height=600, width=1600,
                       showlegend=False)
+
+    max_abs_value = max(abs(df_test[['0_dis', '1_dis', '2_dis', 'Euc_dis', 'L1_dis']].max().max()),
+                    abs(df_test[['0_dis', '1_dis', '2_dis', 'Euc_dis', 'L1_dis']].min().min()))
+
+
+    y_axis_range = [-max_abs_value * 1.0, max_abs_value * 1.3]
+    # Set the extended y-axis range for all subplots
+    fig.update_yaxes(range=y_axis_range, row=1, col=1)
+    fig.update_yaxes(range=y_axis_range, row=1, col=2)
+    fig.update_yaxes(range=y_axis_range, row=1, col=3)
+    fig.update_yaxes(range=y_axis_range, row=1, col=4)
+    fig.update_yaxes(range=y_axis_range, row=1, col=5)
+
     fig.update_xaxes(showticklabels=False)
     return fig
 
@@ -333,7 +361,7 @@ def plot_single(df_test, column_name, title):
 
     fig.add_trace(go.Box(y=df_test[column_name], boxpoints='suspectedoutliers', boxmean=True))
 
-    fig.update_layout(height=600, width=200, showlegend=False)
+    fig.update_layout(height=400, width=600, showlegend=False)
     return fig
 
 def plot_side_by_side(df1, df2, column_name, title1, title2):
@@ -345,7 +373,7 @@ def plot_side_by_side(df1, df2, column_name, title1, title2):
     # Add the second box plot from df2
     fig.add_trace(go.Box(y=df2[column_name], name=title2, boxpoints='suspectedoutliers', boxmean=True), row=1, col=2)
     fig.update_yaxes(matches='y')
-    fig.update_layout(height=600, width=800, showlegend=False)
+    fig.update_layout(height=400, width=600, showlegend=False)
     return fig
 
     
@@ -377,7 +405,10 @@ def transform_moving_ct(moving_CT_image, fixed_CT_image, coordination, pixdim):
 
 
 def making_array(outlier):
-    fixed_CT_image = itk.imread(outlier['fixed'])  # Load the fixed image
+
+    fixed_CT_image = itk.imread(outlier['fixed']) 
+ # Load the fixed image
+
     moving_CT_image = itk.imread(outlier['moving'])  # Load the moving image
 
     # True and predicted coordinates from the outlier data
@@ -400,27 +431,35 @@ def making_array(outlier):
 
     return fixed_CT_array, moving_CT_array, transformed_moving_CT_array_true, difference_true, transformed_moving_CT_array_pred, difference_pred
 
-def plot_img (data, slice_index=50, colormap='jet', scaling_factor = 1000.0):
+def plot_img(data, slice_index=50, colormap='jet', scaling_factor=1000.0):
     fixed_CT_array, moving_CT_array, transformed_moving_CT_array_true, difference_true, transformed_moving_CT_array_pred, difference_pred = data
-    plt.figure(figsize=(8,8))
+    plt.figure(figsize=(6, 6))
 
     def add_subplot_with_colorbar(index, data, title):
         plt.subplot(3, 2, index)
         scaled_data = data[slice_index] / scaling_factor  # Scale the data
         img = plt.imshow(scaled_data, cmap=colormap)
         cbar = plt.colorbar(img, fraction=0.03, pad=0.03)
-        cbar.ax.set_title(f'     x10^{int(np.log10(scaling_factor))}', fontsize=10)
-        plt.title(title)
+        cbar.ax.set_title(f'     x10^{int(np.log10(scaling_factor))}', fontsize=4)
+        cbar.ax.tick_params(labelsize=6)
 
+        plt.title(title, fontsize=6)
+        
+        # Set the tick label size for both x and y axes
+        plt.tick_params(axis='both', which='major', labelsize=4)
+        plt.tick_params(axis='both', which='minor', labelsize=4)
+
+    # Add subplots with smaller titles and axis tick labels
     add_subplot_with_colorbar(1, fixed_CT_array, 'Fixed Image')
     add_subplot_with_colorbar(2, moving_CT_array, 'Moving Image')
     add_subplot_with_colorbar(3, transformed_moving_CT_array_true, 'Transformed Moving (True)')
     add_subplot_with_colorbar(4, difference_true, 'Difference for (True coordination)')
     add_subplot_with_colorbar(5, transformed_moving_CT_array_pred, 'Transformed Moving (Pred)')
-    add_subplot_with_colorbar(6, difference_pred, 'Difference for (Pred coordinatoion)')
+    add_subplot_with_colorbar(6, difference_pred, 'Difference for (Pred coordination)')
 
     plt.tight_layout()
     return plt
+
 
 
 def display_coordination_info(outlier):

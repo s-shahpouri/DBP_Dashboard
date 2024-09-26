@@ -31,13 +31,16 @@ st.markdown("<div class='centered-title' style='color:#04028b;'>DBP Dashboard</d
 # Call the function to load the CSS
 load_css("style.css")
 
-ensemble_data_path = '/data/sama/Datasets/Dash_data/df_best_esms.pkl'
-single_data_path = '/data/sama/Datasets/Dash_data/df_single.pkl'
+ensemble_data_path = 'df_best_esms.pkl'
+single_data_path = 'df_single.pkl'
+user_data_path = 'df_user.pkl'
+current_dir = '/data/bahrdoh/Deep_Learning_Pipeline_Test/experiments_dose/test'
 
 # Define the paths to the pickle files
 pickle_files = {
     "Ensemble": ensemble_data_path,
-    "Single": single_data_path
+    "Single": single_data_path,
+    "User": user_data_path
 }
 
 df_filtered_tagged_losses = None  # Initialize df_filtered_tagged_losses as None
@@ -45,55 +48,49 @@ df_filtered_tagged_losses = None  # Initialize df_filtered_tagged_losses as None
 # Add a radio button to the sidebar for selecting the pickle file
 with st.sidebar:
     st.sidebar.markdown("<div style='height: 50px;'></div>", unsafe_allow_html=True)
-
-    main_root = st.text_input("Directory ↘️ ", '/data/sama/Test_data')
-
-    back_dash = BackDash(main_root)
-    df_cleaned = back_dash.process()
-
-    df_best_esms = back_dash.process_ensemble(df_cleaned)
-    back_dash.save_ensemble_pickle(df_best_esms, ensemble_data_path)
-
-    # Or generate df_single for the single approach
-    df_single = back_dash.process_single(df_cleaned)
-    back_dash.save_ensemble_pickle(df_single, single_data_path)
+    main_root = st.text_input("Current Directory ↘️ ", current_dir)
+    selected_approach = st.radio("Evaluation Approaches", ["Ensemble", "Single", "User"])
 
 
 
-    # Radio button for selecting the pickle file or folder
-    selected_pickle = st.radio("Evaluation Approaches", list(pickle_files.keys()) + ["Select another Folder"])
+    if selected_approach == "Ensemble":
+        back_dash = BackDash(main_root)
+        df_cleaned = back_dash.process()
+        df_best_esms = back_dash.process_ensemble(df_cleaned)
+        back_dash.save_pickle(df_best_esms, ensemble_data_path)
+        main_df = pd.read_pickle(pickle_files[selected_approach])
+        # df_filtered_tagged_losses = main_df
+        df_filtered_tagged_losses = main_df.iloc[:-1]
+        df_avg = main_df.iloc[-1]
+        # print(df_avg.head())
 
-    if selected_pickle == "Select another Folder":
-        folder_path = st.text_input("Enter the path of the folder containing the files:")
 
-        if folder_path:
-            if os.path.exists(folder_path):
-                
-                # Process the folder and generate a pickle file
-                pickle_file_path = folder_approach(folder_path)
+    elif selected_approach == "Single":
+        back_dash = BackDash(main_root)
+        df_cleaned = back_dash.process()
+        df_single = back_dash.process_single(df_cleaned)
+        back_dash.save_pickle(df_single, single_data_path)
+        main_df = pd.read_pickle(pickle_files[selected_approach])
+        df_filtered_tagged_losses = main_df.iloc[:-1]
 
-                if pickle_file_path:
-                    st.success(f"Loaded successfully!")
-                    # Load the generated pickle file for evaluation
-                    main_df = pd.read_pickle(pickle_file_path)
-                    df_filtered_tagged_losses = main_df  # Use your evaluation logic here
-            else:
-                st.error("The folder path does not exist.")
-    else:
-        # Load the selected pickle file
-        main_df = pd.read_pickle(pickle_files[selected_pickle])
+    elif selected_approach == "User":
+        folder_path = st.text_input("Enter the path of the folder:")
+        if folder_path and os.path.exists(folder_path):
 
-        # If Ensemble is selected, remove the last row
-        if selected_pickle == "Ensemble":
-            # df_filtered_tagged_losses = main_df
-            df_filtered_tagged_losses = main_df.iloc[:-1]
-            df_avg = main_df.iloc[-1]
-            print(df_avg.head())
-        else:
+            back_dash = BackDash(main_root)
+            df_cleaned = back_dash.process()
+            df_user = back_dash.process_user(folder_path)
+            back_dash.save_pickle(df_user, user_data_path)
+            main_df = pd.read_pickle(pickle_files[selected_approach])
             df_filtered_tagged_losses = main_df
+            st.success("Processed and saved the user folder.")
+        else:
+            st.error("Invalid folder path!")
+
 
 
     st.divider()
+    
 
     available_roots = df_filtered_tagged_losses['tag'].tolist()
     selected_tag = st.sidebar.selectbox("Select DL Model", options=available_roots)
@@ -104,7 +101,6 @@ with st.sidebar:
     # Dropdown for selecting dataset mode (Test, Val, or Train)
     mode = st.sidebar.selectbox("Select Mode", options=['test', 'val', 'train'])
 
-    
     df = read_from_pickle(selected_row[f'{mode}_output'])
     data_dict = selected_row[f'{mode}_dict']
 
@@ -238,7 +234,7 @@ with tab1:
         plot_colored_wordcloud(max_diff_map[axis_options[selected_axis]], f'Max Differences ({selected_axis})')
 
 with tab2:
-    if selected_pickle == "Ensemble":
+    if selected_approach == "Ensemble":
         df_ensembled = read_from_pickle(df_avg[f'{mode}_output'])
         # Create columns for the radio buttons to arrange them horizontally
         col1, col2, col3, col4, col5, col6, col7 , col8 = st.columns(8)
@@ -310,7 +306,7 @@ with tab2:
             st.plotly_chart(fig, use_container_width=True)
 
         # with col1:      
-        #     if selected_pickle == "Ensemble":
+        #     if selected_approach == "Ensemble":
                 
         #         df_ensembled = read_from_pickle(df_avg[f'{mode}_output'])
 
@@ -340,8 +336,9 @@ with tab3:
 
 
     with col2:
-        st.markdown("<h3 style='font-size:20px; text-align: center;'>Dose images</h3>", unsafe_allow_html=True)
+        # st.markdown("<h3 style='font-size:20px; text-align: center;'>Dose images</h3>", unsafe_allow_html=True)
         if compare_clicked and not filtered_data.empty:
+
             data = making_array(filtered_data.iloc[0].to_dict())
             fig = plot_img(data)
             st.pyplot(fig)

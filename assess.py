@@ -160,18 +160,20 @@ class PathName:
         # Iterate through each row in the main dataframe
         for index, outlier in self.df.iterrows():
             patient_id = outlier['PatientID']
+            patient_id_0 = patient_id.split('_')[0]
+
             true_0, true_1, true_2 = outlier['true_0'], outlier['true_1'], outlier['true_2']
 
             # Find matching entries in json_df
             matching_entries = self.json_df[
-                (self.json_df['PatientID'] == patient_id) &
+                (self.json_df['PatientID'] == patient_id_0) &
                 (np.isclose(self.json_df['true_0'], true_0, atol=1e-3)) &
                 (np.isclose(self.json_df['true_1'], true_1, atol=1e-3)) &
                 (np.isclose(self.json_df['true_2'], true_2, atol=1e-3))
             ]
 
             if matching_entries.empty:
-                # print(f"No match found for Patient ID: {patient_id} with coordinates {true_0}, {true_1}, {true_2}")
+                print(f"No match found for Patient ID: {patient_id} with coordinates {true_0}, {true_1}, {true_2}")
                 pass
             elif len(matching_entries) > 1:
                 print(f"Multiple matches found for Patient ID: {patient_id} with coordinates {true_0}, {true_1}, {true_2}")
@@ -180,7 +182,7 @@ class PathName:
                     self.df.at[index, 'fixed'] = entry['fixed']
                     self.df.at[index, 'moving'] = entry['moving']
                     break
-
+        print(self.df['fixed'])
         return self.df
 
     def append_moving_extraction(self):
@@ -417,8 +419,6 @@ def attach_data_dict_paths(_path, row):
     else:
         # _path is a root directory, so join it with the folder from the row
         path = os.path.join(_path, row['Folder'])
-
-    print(f"Using path: {path}")
     
     # Extract the tr value from the row and build the full path to the JSON file
     tr_value = int(row['tr'])
@@ -444,10 +444,10 @@ def attach_data_dict_paths(_path, row):
     return row
 
 
-def folder_approach(path):
-    print(path)
+def folder_approach(input_path, output_path):
+    print(input_path)
     all_results = []
-    folder_parts = path.split('_')
+    folder_parts = input_path.split('_')
     folder = '_'.join(folder_parts[5:])
 
     print(folder)
@@ -455,8 +455,8 @@ def folder_approach(path):
         ensemble_id = None  # Assign None if we can't find the ensemble_id
     else:
         ensemble_id = folder_parts[6]
-    train_loss, val_loss, test_loss, avg_train_loss, avg_val_loss, avg_test_loss = extract_losses(path)
-    tr_value = extract_tr_value(path)
+    train_loss, val_loss, test_loss, avg_train_loss, avg_val_loss, avg_test_loss = extract_losses(input_path)
+    tr_value = extract_tr_value(input_path)
     all_results.append({
         'esm': ensemble_id,
         'tr': tr_value,
@@ -474,11 +474,9 @@ def folder_approach(path):
 
     # Drop rows where the ensemble_id is missing (optional)
     df_cleaned = df_all_models.dropna(subset=['esm'], how='all')
-    df_cleaned.loc[:, 'loss_function_name'] = df_cleaned['Folder'].apply(lambda folder: extract_loss_function_from_folder(path))
+    df_cleaned.loc[:, 'loss_function_name'] = df_cleaned['Folder'].apply(lambda folder: extract_loss_function_from_folder(input_path))
     df_cleaned = keep_lowest_single_losses(df_cleaned)
-    df_cleaned = df_cleaned.apply(lambda row: attach_csv_outputs(path, row), axis=1)
-    df_cleaned = df_cleaned.apply(lambda row: attach_data_dict_paths(path, row), axis=1)
-    pickle_file_path = "df_user.pkl"
-    df_cleaned.to_pickle(pickle_file_path)
+    df_cleaned = df_cleaned.apply(lambda row: attach_csv_outputs(input_path, row), axis=1)
+    df_cleaned = df_cleaned.apply(lambda row: attach_data_dict_paths(input_path, row), axis=1)
+    df_cleaned.to_pickle(output_path)
 
-    return pickle_file_path
