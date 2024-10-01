@@ -1,33 +1,21 @@
-
 import numpy as np
 import streamlit as st
 import itk
-import matplotlib.pyplot as plt
 import pandas as pd
 import torch
-
-
-# def read_df(test):
-#     df_test = pd.read_csv(test,  delimiter=';')
-#     df_test = df_test.drop(columns=['Mode'])
-
-#     df_test[['pred_0', 'pred_1', 'pred_2', 'true_0', 'true_1', 'true_2']] = df_test[['pred_0', 'pred_1', 'pred_2', 'true_0', 'true_1', 'true_2']].round(4)
-
-#     # Remove "DBP_" from the 'PatientID' column
-#     df_test['PatientID'] = df_test['PatientID'].str.replace('DBP_', '')
-
-#     # Calculate the differences between predicted and true values
-#     df_test['0_dis'] = df_test['pred_0'] - df_test['true_0']
-#     df_test['1_dis'] = df_test['pred_1'] - df_test['true_1']
-#     df_test['2_dis'] = df_test['pred_2'] - df_test['true_2']
-#     df_test['Euc_dis'] = np.sqrt(df_test['0_dis']**2 + df_test['1_dis']**2 + df_test['2_dis']**2)
-#     df_test['L1_dis'] = abs(df_test['0_dis']) + abs(df_test['1_dis']) + abs(df_test['2_dis'])
-#     df_test['L2_dis'] = df_test['0_dis']**2 + df_test['1_dis']**2 + df_test['2_dis']**2
-
-#     return df_test
-
+import plotly.graph_objs as go
+from plotly.subplots import make_subplots
+import json
+import re
 from monai.metrics import MAEMetric
 from io import StringIO
+from plotly.subplots import make_subplots
+from wordcloud import WordCloud
+import matplotlib.pyplot as plt
+import matplotlib.colors as mcolors
+
+
+
 def read_from_pickle(data):
     """Process data directly from pickle or string format."""
     # If the data is in a string format, convert it into a DataFrame by splitting on the semicolon
@@ -57,7 +45,6 @@ def read_from_pickle(data):
     data['1_dis'] = data['pred_1'] - data['true_1']
     data['2_dis'] = data['pred_2'] - data['true_2']
     data['Euc_dis'] = np.sqrt(data['0_dis']**2 + data['1_dis']**2 + data['2_dis']**2)
-
     
     # Assuming 'data' is already loaded and contains the necessary columns
     pred_tensors = torch.tensor(data[['pred_0', 'pred_1', 'pred_2']].values, dtype=torch.float32)
@@ -69,34 +56,15 @@ def read_from_pickle(data):
     l1_rowwise_distances = l1_distances.mean(dim=1).numpy()  # Calculate the average across dimensions, or use another strategy
     data['L1_dis'] = l1_rowwise_distances
 
-
-#     pred_list = [torch.tensor(row, dtype=torch.float32).unsqueeze(0) for row in data[['pred_0', 'pred_1', 'pred_2']].values]
-#     true_list = [torch.tensor(row, dtype=torch.float32).unsqueeze(0) for row in data[['true_0', 'true_1', 'true_2']].values]
-
-#     # Initialize MAE metric from MONAI
-#     mae_metric = MAEMetric(reduction="none")  # No reduction
-#     mae_values = [mae_metric([p], [t]).item() for p, t in zip(pred_list, true_list)]
-#     data['L1_dis'] = mae_values
-
     # Initialize MSE Loss without reduction
     mse_loss = torch.nn.MSELoss(reduction='none')  # No reduction
     mse_elementwise_distances = mse_loss(pred_tensors, true_tensors)  # Element-wise squared differences
     mse_rowwise_distances = mse_elementwise_distances.mean(dim=1).numpy()  # Calculate the average across dimensions, or use another strategy
     data['L2_dis'] = mse_rowwise_distances
 
-
-    # mse_loss = torch.nn.MSELoss(reduction='none') 
-    # l2_distances = mse_loss(pred_tensors, true_tensors).sum(dim=1)
-    # data['L2_dis'] = l2_distances
-
-
     return data
 
 
-
-import json
-import pandas as pd
-import re
 
 class JsonProcessor:
     def __init__(self, json_path):
@@ -185,19 +153,9 @@ def find_outliers(data, column_name):
 
 
 
-
-
-import plotly.graph_objs as go
-from plotly.subplots import make_subplots
-
-import plotly.graph_objs as go
-from plotly.subplots import make_subplots
-import numpy as np
-
 @ st.cache_data
 def plot_interactive_boxplots_with_outliers(df_test):
-    print("@@@@@@@@@@@@@@")
-    print(df_test.head())
+
     N = 22
     
     # Generate an array of rainbow colors
@@ -270,9 +228,6 @@ def plot_interactive_boxplots_with_outliers(df_test):
 
     fig.update_xaxes(showticklabels=False)
     return fig
-# # Example usage:
-# fig = plot_interactive_boxplots_with_outliers(df_test, outliers_df)
-# fig.show()
 
 
 @ st.cache_data
@@ -349,7 +304,6 @@ def plot_ensemble(df_test):
     return fig
 
 
-# Function for plotting individual plots
 def plot_single(df_test, column_name, title):
     fig = make_subplots(rows=1, cols=1, subplot_titles=[title])
     jitter_amount = 0.1
@@ -363,6 +317,7 @@ def plot_single(df_test, column_name, title):
 
     fig.update_layout(height=400, width=600, showlegend=False)
     return fig
+
 
 def plot_side_by_side(df1, df2, column_name, title1, title2):
     fig = make_subplots(rows=1, cols=2, subplot_titles=[title1, title2])
@@ -398,10 +353,9 @@ def transform_moving_ct(moving_CT_image, fixed_CT_image, coordination, pixdim):
 
     resampler_updated.Update()
     transformed_moving_CT_image_updated = resampler_updated.GetOutput()
-    transformed_moving_CT_array_updated = itk.array_view_from_image(transformed_moving_CT_image_updated)
+    transformed_moving_CT_array_updated = itk.array_view_from_image(transformed_moving_CT_image_updated).astype(int)
 
     return transformed_moving_CT_array_updated
-
 
 
 def making_array(outlier):
@@ -424,12 +378,13 @@ def making_array(outlier):
                     moving_CT_image, fixed_CT_image, pred_coords, pixdim)
 
     # Calculate the difference between the fixed image and transformed moving images (true and predicted coordinates)
-    fixed_CT_array = itk.array_view_from_image(fixed_CT_image)
-    moving_CT_array = itk.array_view_from_image(moving_CT_image)
+    fixed_CT_array = itk.array_view_from_image(fixed_CT_image).astype(int)
+    moving_CT_array = itk.array_view_from_image(moving_CT_image).astype(int)
     difference_true = transformed_moving_CT_array_true - fixed_CT_array
     difference_pred = transformed_moving_CT_array_pred - fixed_CT_array
 
     return fixed_CT_array, moving_CT_array, transformed_moving_CT_array_true, difference_true, transformed_moving_CT_array_pred, difference_pred
+
 
 def plot_img(data, slice_index=50, colormap='jet', scaling_factor=1000.0):
     fixed_CT_array, moving_CT_array, transformed_moving_CT_array_true, difference_true, transformed_moving_CT_array_pred, difference_pred = data
@@ -459,7 +414,6 @@ def plot_img(data, slice_index=50, colormap='jet', scaling_factor=1000.0):
 
     plt.tight_layout()
     return plt
-
 
 
 def display_coordination_info(outlier):
@@ -493,16 +447,11 @@ def display_coordination_info(outlier):
     return coord_html
 
 
-# Load the CSS file
 def load_css(file_path):
     with open(file_path, 'r') as f:
         st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 
-from wordcloud import WordCloud
-import matplotlib.pyplot as plt
-import matplotlib.colors as mcolors
 
-# Word Cloud Visualization Function
 def plot_colored_wordcloud(data_dict, title):
     # Normalize the values to a range between 0 and 1
     min_val = min(data_dict.values())
@@ -542,10 +491,6 @@ def plot_colored_wordcloud(data_dict, title):
     plt.show()
     st.pyplot(plt)
 
-import numpy as np
-import pandas as pd
-import plotly.graph_objs as go
-from plotly.subplots import make_subplots
 
 def calculate_ensemble_average(dataset_option):
     df_ensemble = pd.read_pickle('df_best_esms.pkl')
@@ -565,7 +510,6 @@ def calculate_ensemble_average(dataset_option):
             
             # Append the DataFrame to the list if valid
             if df is not None:
-                print(df.head())
                 df_list.append(df)
             else:
                 st.write(f"No data found for model {row['tag']} in {dataset_option} mode.")
@@ -585,6 +529,7 @@ def calculate_ensemble_average(dataset_option):
         
         return averaged_df
 
+
 def plot_ensemble_average_boxplots(averaged_data):
     N = 6  # Number of subplots (for the 6 deltas)
     colors = ['hsl('+str(h)+',50%'+',50%)' for h in np.linspace(0, 360, N)]
@@ -603,3 +548,59 @@ def plot_ensemble_average_boxplots(averaged_data):
     # Update layout
     fig.update_layout(height=600, width=1600, showlegend=False)
     return fig
+
+
+
+def highlight_min_max(df, loss_columns):
+    # Apply styling with conditional formatting for min and max values
+    styles = df.style.apply(lambda x: ['background-color: cornflowerblue' if v == x.min() 
+                                       else 'background-color: orange' if v == x.max() 
+                                       else '' for v in x], subset=loss_columns)
+    return styles
+
+
+import plotly.express as px
+
+def plot_overview(df_overview, mode, selected_approach):
+
+    styled_df = pd.DataFrame()
+    if selected_approach == "Ensemble":
+
+        fig = px.scatter(
+            df_overview, 
+            x='esm', 
+            y=f'avg_{mode}_loss', 
+            title=f"{mode.capitalize()} losses in all Ensembles.",
+            labels={'tr': 'Trial', f'{mode}_loss': f'{mode} Loss', 'esm': 'Ensembles'}
+        )
+        st.plotly_chart(fig)
+        df_overview_clean = df_overview[['esm', 'tr', 'avg_train_loss', 'avg_val_loss', 'avg_test_loss']].dropna()
+        df_overview_clean['esm'] = pd.to_numeric(df_overview_clean['esm'], errors='coerce')
+        df_overview_sorted = df_overview_clean.sort_values(by='esm', ascending=True)
+        df_overview_sorted[['avg_train_loss', 'avg_val_loss', 'avg_test_loss']] = df_overview_sorted[['avg_train_loss', 'avg_val_loss', 'avg_test_loss']].apply(lambda x: x.round(3).astype(str))
+
+        styled_df = highlight_min_max(df_overview_sorted, ['avg_train_loss', 'avg_val_loss', 'avg_test_loss'])
+    
+
+    elif selected_approach == "Single":
+
+        fig = px.scatter(
+            df_overview, 
+            x='esm', 
+            y=f'{mode}_loss', 
+            color='tr',
+            title=f"{mode.capitalize()} losses in Trials.",
+            labels={'tr': 'Trial', f'{mode}_loss': f'{mode} Loss', 'esm': 'Ensembles'}
+        )
+        st.plotly_chart(fig)
+        df_overview_clean = df_overview[['esm', 'tr', 'train_loss', 'val_loss', 'test_loss']].dropna()
+        df_overview_clean['esm'] = pd.to_numeric(df_overview_clean['esm'], errors='coerce')
+        df_overview_sorted = df_overview_clean.sort_values(by=['esm', 'tr'] , ascending=True)
+        df_overview_sorted[['train_loss', 'val_loss', 'test_loss']] = df_overview_sorted[['train_loss', 'val_loss', 'test_loss']].apply(lambda x: x.round(3).astype(str))
+
+        styled_df = highlight_min_max(df_overview_sorted, ['train_loss', 'val_loss', 'test_loss'])
+
+
+    
+
+    return styled_df

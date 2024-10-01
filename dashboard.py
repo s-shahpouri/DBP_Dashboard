@@ -9,15 +9,14 @@ import matplotlib.pyplot as plt
 import pickle
 import os
 from wordcloud import WordCloud
-import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
 import numpy as np
 import seaborn as sns
-import matplotlib.pyplot as plt
 import matplotlib as mpl
 from assess import OutlierDetector, PathName, folder_approach
-from vis import calculate_ensemble_average, plot_ensemble_average_boxplots
+from vis import calculate_ensemble_average, plot_ensemble_average_boxplots, plot_overview
 from back_dash import BackDash
+import plotly.express as px
 
 
 
@@ -121,12 +120,12 @@ with st.sidebar:
 
     # Dropdown for difference mode selection
     mode_dict = {
-        '0_dis': 'X Axis Distance',
-        '1_dis': 'Y Axis Distance',
-        '2_dis': 'Z Axis Distance',
-        'Euc_dis': 'Euclidean Distance',
-        'L1_dis': 'L1 Distance',
-        'L2_dis': 'L2 Distance'
+        '0_dis': 'X',
+        '1_dis': 'Y',
+        '2_dis': 'Z',
+        'Euc_dis': 'R',
+        'L1_dis': 'L1',
+        'L2_dis': 'L2'
     }
 
     # Extracting the keys from the dictionary for the dropdown options
@@ -134,7 +133,7 @@ with st.sidebar:
 
 
     # Sidebar to select mode
-    selected_mode_key = st.sidebar.selectbox("Select Difference in Axes", options=mode_options, format_func=lambda x: mode_dict[x])
+    selected_mode_key = st.sidebar.selectbox("Select Axes", options=mode_options, format_func=lambda x: mode_dict[x])
 
     # Process the outliers based on the selected mode key
     outlier_detector.process(selected_mode_key)
@@ -170,68 +169,27 @@ with st.sidebar:
 
 
 # Create two tabs
-tab1, tab2, tab3, tab4 = st.tabs(["Overview |", "Outliers |", "Images |", "Statistics |"])
+tab1, tab2, tab3, tab4 = st.tabs(["Overview |", "Plots |", "Images |", "Statistics |"])
+
 
 with tab1:
-    # st.markdown("<h2 style='text-align: center;'>Overview</h2>", unsafe_allow_html=True)
 
-    # Define the radio button options
-    axis_options = {
-        'ΔX': '0_dis',
-        'ΔY': '1_dis',
-        'ΔZ': '2_dis',
-        'ΔR': 'Euc_dis',
-        'L1': 'L1_dis',
-        'L2': 'L2_dis'
-    }
-  
-    # Add the radio button for axis selection
-    selected_axis = st.radio("Select Axis:", list(axis_options.keys()))
+    df_overview = df_cleaned.copy()
+    df_overview['tr'] = df_overview['tr'].astype(int)
+    df_overview = df_overview.reset_index(drop = True)
+    # st.table(df_overview)
 
+    col1, col2, col3 = st.columns([1, 8, 1])
 
-
-
-    # Calculate the Mean Absolute Difference for each patient across coordinates
-    mean_abs_0_dis = df.groupby('PatientID')['0_dis'].apply(lambda x: abs(x).mean()).to_dict()
-    mean_abs_1_dis = df.groupby('PatientID')['1_dis'].apply(lambda x: abs(x).mean()).to_dict()
-    mean_abs_2_dis = df.groupby('PatientID')['2_dis'].apply(lambda x: abs(x).mean()).to_dict()
-    mean_abs_diff_euclidean = df.groupby('PatientID')['Euc_dis'].apply(lambda x: abs(x).mean()).to_dict()
-    mean_abs_diff_L1 = df.groupby('PatientID')['L1_dis'].apply(lambda x: abs(x).mean()).to_dict()
-    mean_abs_diff_L2 = df.groupby('PatientID')['L2_dis'].apply(lambda x: abs(x).mean()).to_dict()
-
-    # Calculate the Maximum for each patient across coordinates
-    max_0_dis = df.groupby('PatientID')['0_dis'].apply(lambda x: max(x)).to_dict()
-    max_1_dis = df.groupby('PatientID')['1_dis'].apply(lambda x: max(x)).to_dict()
-    max_2_dis = df.groupby('PatientID')['2_dis'].apply(lambda x: max(x)).to_dict()
-    max_diff_euclidean = df.groupby('PatientID')['Euc_dis'].apply(lambda x: max(x)).to_dict()
-    max_diff_L1 = df.groupby('PatientID')['L1_dis'].apply(lambda x: max(x)).to_dict()
-    max_diff_L2 = df.groupby('PatientID')['L2_dis'].apply(lambda x: max(x)).to_dict()
-
-    # Mapping from axis to data dictionaries
-    mean_diff_map = {
-        '0_dis': mean_abs_0_dis,
-        '1_dis': mean_abs_1_dis,
-        '2_dis': mean_abs_2_dis,
-        'Euc_dis': mean_abs_diff_euclidean,
-        'L1_dis': mean_abs_diff_L1,
-        'L2_dis': mean_abs_diff_L2
-    }
-
-    max_diff_map = {
-        '0_dis': max_0_dis,
-        '1_dis': max_1_dis,
-        '2_dis': max_2_dis,
-        'Euc_dis': max_diff_euclidean,
-        'L1_dis': max_diff_L1,
-        'L2_dis': max_diff_L2
-    }
-
-    # Plot the selected word clouds side by side
-    col1, col2 = st.columns(2)
-    with col1:
-        plot_colored_wordcloud(mean_diff_map[axis_options[selected_axis]], f'Mean Absolute Differences ({selected_axis})')
     with col2:
-        plot_colored_wordcloud(max_diff_map[axis_options[selected_axis]], f'Max Differences ({selected_axis})')
+
+        styled_df = plot_overview(df_overview, mode, selected_approach)
+
+    col1, col2, col3 = st.columns([1, 1.5, 1])
+    with col2:
+        st.dataframe(styled_df, use_container_width=True, hide_index=True)
+
+
 
 with tab2:
     if selected_approach == "Ensemble":
@@ -352,9 +310,6 @@ with tab4:
     desc_stats = df[['0_dis', '1_dis', '2_dis', 'Euc_dis', 'L1_dis', 'L2_dis']].describe().T
     st.dataframe(desc_stats)
 
-
-###########################################################################################################
-
     st.divider()
     st.markdown("""
         ### Z-Score Analysis Table
@@ -406,10 +361,6 @@ with tab4:
     st.write(styled_outliers.to_html(), unsafe_allow_html=True)
 
 
-
-
-################################################################################################################
-
     st.divider()
     st.subheader("Correlation Matrix")
 
@@ -422,5 +373,4 @@ with tab4:
     # Display the styled correlation matrix in Streamlit
     st.dataframe(corr_styled)
 
-################################################################################################################
 

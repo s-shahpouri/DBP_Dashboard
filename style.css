@@ -2,7 +2,7 @@
 /* Logo */
 [data-testid="stSidebar"] {
     background-image: url(https://nf1-expertise.net/media/uploads/nl/locations/previews/og/logo_UMCG_transparant2.png?_=1591783184);
-    background-size: 200px;
+    background-size: 150px;
     background-repeat: no-repeat;
     background-position: 20px 10px;
 }
@@ -57,10 +57,10 @@ div.vg-tooltip-element {
 }
 
 .centered-title {
-    font-size: 50px;
+    font-size: 36px;
     font-weight: bold;
     text-align: center;
-    margin-top: -60px;
+    margin-top: -40px;
 }
 /* Style for sidebar footer */
 .stSidebar {

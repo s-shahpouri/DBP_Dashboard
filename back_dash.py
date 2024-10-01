@@ -101,8 +101,6 @@ class BackDash:
         columns_to_process = ['test_output', 'train_output', 'val_output']
         df_best_esms = self.average_outputs(df_best_esms, columns_to_process)
 
-        print("4444444444444444")
-        print(df_best_esms['tag'])
         return df_best_esms
 
     @staticmethod

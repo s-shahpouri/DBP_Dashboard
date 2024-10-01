@@ -83,7 +83,7 @@ class OutlierDetector:
                 '0_dis': 'X',
                 '1_dis': 'Y',
                 '2_dis': 'Z',
-                'Euc_dis': 'Euc',
+                'Euc_dis': 'R',
                 'L1_dis': 'L1',
                 'L2_dis': 'L2'
             }
@@ -138,16 +138,16 @@ class PathName:
             match = re.search(r'Iter(\d+).*?_rCTp(\d+)', moving_path)
             if match:
                 return f"Iter{match.group(1)}_rCTp{match.group(2)}"
-            else:
-                # Try to match only Iter or rCTp if both aren't available together
-                match_iter = re.search(r'Iter(\d+)', moving_path)
-                match_rCTp = re.search(r'rCTp(\d+)', moving_path)
-                if match_iter and match_rCTp:
-                    return f"Iter{match_iter.group(1)}_rCTp{match_rCTp.group(1)}"
-                elif match_iter:
-                    return f"Iter{match_iter.group(1)}"
-                elif match_rCTp:
-                    return f"rCTp{match_rCTp.group(1)}"
+            # else:
+            #     # Try to match only Iter or rCTp if both aren't available together
+            #     match_iter = re.search(r'Iter(\d+)', moving_path)
+            #     match_rCTp = re.search(r'rCTp(\d+)', moving_path)
+            #     if match_iter and match_rCTp:
+            #         return f"Iter{match_iter.group(1)}_rCTp{match_rCTp.group(1)}"
+            #     elif match_iter:
+            #         return f"Iter{match_iter.group(1)}"
+            #     elif match_rCTp:
+            #         return f"rCTp{match_rCTp.group(1)}"
         return ""  # If no match, return empty string
 
     def find_paths(self):
@@ -182,16 +182,27 @@ class PathName:
                     self.df.at[index, 'fixed'] = entry['fixed']
                     self.df.at[index, 'moving'] = entry['moving']
                     break
-        print(self.df['fixed'])
+        # print(self.df['fixed'])
         return self.df
 
     def append_moving_extraction(self):
         """
         Append the extracted name from the moving column to the PatientID.
         """
-        self.df['PatientID_with_diffs'] = self.df.apply(lambda row: f"{row['PatientID']}{self.extract_name(row['moving'])}", axis=1)
-        self.df['PatientID'] = self.df.apply(lambda row: f"{row['PatientID']}_{self.extract_name(row['moving'])}", axis=1)
+        # Extract the name from 'moving' and create a new PatientID with appended information
+        self.df['extracted_name'] = self.df.apply(lambda row: self.extract_name(row['moving']), axis=1)
+
+        # Use the extracted name to create the final PatientID and PatientID_with_diffs
+        self.df['PatientID_with_diffs'] = self.df.apply(lambda row: f"{row['PatientID']}_{row['extracted_name']}", axis=1)
+        # self.df['PatientID'] = self.df['PatientID_with_diffs']
+
+        # Drop the temporary column after use
+        self.df.drop(columns=['extracted_name'], inplace=True)
+
+        # print(self.df['PatientID'])
         return self.df
+
+
 
     def process(self):
         """
@@ -445,12 +456,12 @@ def attach_data_dict_paths(_path, row):
 
 
 def folder_approach(input_path, output_path):
-    print(input_path)
+    # print(input_path)
     all_results = []
     folder_parts = input_path.split('_')
     folder = '_'.join(folder_parts[5:])
 
-    print(folder)
+    # print(folder)
     if len(folder_parts) < 6:
         ensemble_id = None  # Assign None if we can't find the ensemble_id
     else:
