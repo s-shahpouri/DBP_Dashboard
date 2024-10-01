@@ -358,11 +358,13 @@ def transform_moving_ct(moving_CT_image, fixed_CT_image, coordination, pixdim):
     return transformed_moving_CT_array_updated
 
 
-def making_array(outlier):
+def making_array(outlier, selected_image_type):
 
+    if selected_image_type == "CT":
+        outlier['fixed'] = outlier['fixed'].replace('/nrrd/', '/ct_nrrd/')
+        outlier['moving'] = outlier['moving'].replace('/nrrd/', '/ct_nrrd/')
+    
     fixed_CT_image = itk.imread(outlier['fixed']) 
- # Load the fixed image
-
     moving_CT_image = itk.imread(outlier['moving'])  # Load the moving image
 
     # True and predicted coordinates from the outlier data
@@ -386,9 +388,10 @@ def making_array(outlier):
     return fixed_CT_array, moving_CT_array, transformed_moving_CT_array_true, difference_true, transformed_moving_CT_array_pred, difference_pred
 
 
-def plot_img(data, slice_index=50, colormap='jet', scaling_factor=1000.0):
+def plot_img(data, slice_index, colormap, scaling_factor):
+    
     fixed_CT_array, moving_CT_array, transformed_moving_CT_array_true, difference_true, transformed_moving_CT_array_pred, difference_pred = data
-    plt.figure(figsize=(6, 6))
+    plt.figure(figsize=(6, 5))
 
     def add_subplot_with_colorbar(index, data, title):
         plt.subplot(3, 2, index)

@@ -21,7 +21,11 @@ import plotly.express as px
 
 
 # Set page config
-st.set_page_config(layout='wide', initial_sidebar_state='expanded')
+st.set_page_config(
+    layout='wide', initial_sidebar_state='expanded',
+    page_title="DPB Dashboard",
+    page_icon="logo.png"
+)
 
 # Main layout
 st.markdown("<div class='centered-title' style='color:#04028b;'>DBP Dashboard</div>", unsafe_allow_html=True)
@@ -159,12 +163,11 @@ with st.sidebar:
     else:
         st.write("No outlier is selected to compare.")
 
-    compare_clicked = st.sidebar.button('Compare Images')
+    # compare_clicked = st.sidebar.button('Compare Images')
 
     st.markdown("")
     st.sidebar.caption('''
-    Created by <a href="https://www.linkedin.com/in/zohreh-shahpouri/" target="_blank">Sama Shahpouri</a><br>at 
-    <a href="https://umcgprotonentherapiecentrum.nl/" target="_blank">UMCG Protonentherapiecentrum</a>.
+    Created by at <a href="https://umcgprotonentherapiecentrum.nl/" target="_blank">UMCG Protonentherapiecentrum</a>.
     ''', unsafe_allow_html=True)
 
 
@@ -290,17 +293,35 @@ with tab2:
 with tab3:
 
         # Use columns with specific ratios for better spacing
-    col1, col2 = st.columns([1, 5])
+    col1, col2, col3 = st.columns([1,0.1, 4])
 
+    with col1:
+        selected_image_type = st.radio("Select Image Type", [ "Dose", "CT"])
+        st.divider()
+        available_colormaps = ['viridis', 'gray', 'binary', 'jet', ]
+        selected_colormap = st.selectbox("Select Color Palette", available_colormaps)
 
-    with col2:
-        # st.markdown("<h3 style='font-size:20px; text-align: center;'>Dose images</h3>", unsafe_allow_html=True)
-        if compare_clicked and not filtered_data.empty:
+        # Define the scaling factor based on the selected image type
+        if selected_image_type == "CT":
+            scaling_factor = 100.0  # No scaling for CT
+            filtered_data['fixed'] = filtered_data['fixed'].replace('/nrrd/', '/ct_nrrd/')
+            filtered_data['moving'] = filtered_data['moving'].replace('/nrrd/', '/ct_nrrd/')
+        elif selected_image_type == "Dose":
+            scaling_factor = 1000.0  # Scale for Dose images
+            filtered_data['fixed'] = filtered_data['fixed'].replace('/ct_nrrd/', '/nrrd/')
+            filtered_data['moving'] = filtered_data['moving'].replace('/ct_nrrd/', '/nrrd/')
 
-            data = making_array(filtered_data.iloc[0].to_dict())
-            fig = plot_img(data)
+        data = making_array(filtered_data.iloc[0].to_dict(), selected_image_type)
+        fixed_CT_array, _, _, _, _, _ = data
+        max_slice_index  = fixed_CT_array.shape[0] - 1
+        st.divider()
+        slice_index = st.slider("Select Slice Index", min_value=0, max_value=max_slice_index, value=max_slice_index // 2)
+
+    with col3:
+        try:
+            fig = plot_img(data, slice_index, colormap=selected_colormap, scaling_factor=scaling_factor)
             st.pyplot(fig)
-        else:
+        except:
             st.markdown("<p class='centered-lowered-text'>No data available to show.<br>Click on 'Compare' for displaying!</p>", unsafe_allow_html=True)
 
 
