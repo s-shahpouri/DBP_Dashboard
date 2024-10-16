@@ -13,7 +13,7 @@ import matplotlib.colors as mcolors
 import numpy as np
 import seaborn as sns
 import matplotlib as mpl
-from assess import OutlierDetector, PathName, folder_approach
+from assess import OutlierDetector, PathName, folder_approach, DoseGenerator
 from vis import calculate_ensemble_average, plot_ensemble_average_boxplots, plot_overview
 from back_dash import BackDash
 import plotly.express as px
@@ -88,88 +88,92 @@ with st.sidebar:
             df_filtered_tagged_losses = main_df
             st.success("Processed and saved the user folder.")
         else:
-            st.error("Invalid folder path!")
+            st.error("Enter a valid folder path!")
 
 
 
     st.divider()
     
+    try:
 
-    available_roots = df_filtered_tagged_losses['tag'].tolist()
-    selected_tag = st.sidebar.selectbox("Select DL Model", options=available_roots)
+        available_roots = df_filtered_tagged_losses['tag'].tolist()
+        selected_tag = st.sidebar.selectbox("Select DL Model", options=available_roots)
 
-    # Get the corresponding row for the selected tag
-    selected_row = df_filtered_tagged_losses[df_filtered_tagged_losses['tag'] == selected_tag].iloc[0]
+        # Get the corresponding row for the selected tag
+        selected_row = df_filtered_tagged_losses[df_filtered_tagged_losses['tag'] == selected_tag].iloc[0]
 
-    # Dropdown for selecting dataset mode (Test, Val, or Train)
-    mode = st.sidebar.selectbox("Select Mode", options=['test', 'val', 'train'])
+        # Dropdown for selecting dataset mode (Test, Val, or Train)
+        mode = st.sidebar.selectbox("Select Mode", options=['test', 'val', 'train'])
 
-    df = read_from_pickle(selected_row[f'{mode}_output'])
-    data_dict = selected_row[f'{mode}_dict']
-
-
-    # Initialize the DataProcessor and PathName
-    data_processor = DataProcessor(data_dict)
-    json_df = data_processor.get_dataframe()
-
-    # After initializing df and json_df
-    # Initialize the PathFinder with df and json_df
-    pathname = PathName(df, json_df)
-
-    # Process the DataFrame to find paths and append moving path extraction
-    df = pathname.process()
-
-    # Now initialize the OutlierDetector with df and json_df
-    outlier_detector = OutlierDetector(df, json_df)  # Instantiate the class
-
-    # Dropdown for difference mode selection
-    mode_dict = {
-        '0_dis': 'X',
-        '1_dis': 'Y',
-        '2_dis': 'Z',
-        'Euc_dis': 'R',
-        'L1_dis': 'L1',
-        'L2_dis': 'L2'
-    }
-
-    # Extracting the keys from the dictionary for the dropdown options
-    mode_options = list(mode_dict.keys())
+        df = read_from_pickle(selected_row[f'{mode}_output'])
+        data_dict = selected_row[f'{mode}_dict']
 
 
-    # Sidebar to select mode
-    selected_mode_key = st.sidebar.selectbox("Select Axes", options=mode_options, format_func=lambda x: mode_dict[x])
+        # Initialize the DataProcessor and PathName
+        data_processor = DataProcessor(data_dict)
+        json_df = data_processor.get_dataframe()
 
-    # Process the outliers based on the selected mode key
-    outlier_detector.process(selected_mode_key)
+        # After initializing df and json_df
+        # Initialize the PathFinder with df and json_df
+        pathname = PathName(df, json_df)
 
-    # Filter outliers based on mode
-    filtered_outliers_df = outlier_detector.filter_outliers_by_mode(selected_mode_key)
-    
-    # Get the options from the new 'PatientID_with_diffs'
-    outlier_options = filtered_outliers_df['PatientID_with_diffs'].unique()
+        # Process the DataFrame to find paths and append moving path extraction
+        df = pathname.process()
 
-    # Sidebar to select the specific outlier with a unique key
-    selected_outlier_id = st.sidebar.selectbox("Select Outlier", options=outlier_options, key=f"outlier_{selected_mode_key}")
+        # Now initialize the OutlierDetector with df and json_df
+        outlier_detector = OutlierDetector(df, json_df)  # Instantiate the class
 
-    # Displaying the coordination information
-    st.markdown("<h3 style='text-align: center;'>Info of selected point</h3>", unsafe_allow_html=True)
+        # Dropdown for difference mode selection
+        mode_dict = {
+            '0_dis': 'X',
+            '1_dis': 'Y',
+            '2_dis': 'Z',
+            'Euc_dis': 'R',
+            'L1_dis': 'L1',
+            'L2_dis': 'L2'
+        }
 
-    # Filter based on patient_id and mode
-    filtered_data = filtered_outliers_df[filtered_outliers_df['PatientID_with_diffs'] == selected_outlier_id]
-    if not filtered_data.empty:
-        outlier = filtered_data.iloc[0].to_dict()
-        coord_html = display_coordination_info(outlier)
-        st.markdown(coord_html, unsafe_allow_html=True)
-    else:
-        st.write("No outlier is selected to compare.")
+        # Extracting the keys from the dictionary for the dropdown options
+        mode_options = list(mode_dict.keys())
 
-    # compare_clicked = st.sidebar.button('Compare Images')
 
-    st.markdown("")
-    st.sidebar.caption('''
-    Created by at <a href="https://umcgprotonentherapiecentrum.nl/" target="_blank">UMCG Protonentherapiecentrum</a>.
-    ''', unsafe_allow_html=True)
+        # Sidebar to select mode
+        selected_mode_key = st.sidebar.selectbox("Select Axes", options=mode_options, format_func=lambda x: mode_dict[x])
 
+        # Process the outliers based on the selected mode key
+        outlier_detector.process(selected_mode_key)
+
+        # Filter outliers based on mode
+        filtered_outliers_df = outlier_detector.filter_outliers_by_mode(selected_mode_key)
+        
+        # Get the options from the new 'PatientID_with_diffs'
+        outlier_options = filtered_outliers_df['PatientID_with_diffs'].unique()
+
+        # Sidebar to select the specific outlier with a unique key
+        selected_outlier_id = st.sidebar.selectbox("Select Outlier", options=outlier_options, key=f"outlier_{selected_mode_key}")
+
+        # Displaying the coordination information
+        st.markdown("<h3 style='text-align: center;'>Info of selected outlier</h3>", unsafe_allow_html=True)
+
+
+        filtered_data = filtered_outliers_df[filtered_outliers_df['PatientID_with_diffs'] == selected_outlier_id]
+
+
+        if not filtered_data.empty:
+            outlier = filtered_data.iloc[0].to_dict()
+            coord_html = display_coordination_info(outlier)
+            st.markdown(coord_html, unsafe_allow_html=True)
+        else:
+            st.write("No outlier is selected to compare.")
+
+        # compare_clicked = st.sidebar.button('Compare Images')
+
+        st.markdown("")
+        st.sidebar.caption('''
+                Created by <a href="https://www.linkedin.com/in/zohreh-shahpouri/" target="_blank">Sama Shahpouri</a><br>at 
+                <a href="https://umcgprotonentherapiecentrum.nl/" target="_blank">UMCG Protonentherapiecentrum</a>.        ''', unsafe_allow_html=True)
+    except:
+        pass
 
 # Create two tabs
 tab1, tab2, tab3, tab4 = st.tabs(["Overview |", "Plots |", "Images |", "Statistics |"])
@@ -177,26 +181,31 @@ tab1, tab2, tab3, tab4 = st.tabs(["Overview |", "Plots |", "Images |", "Statisti
 
 with tab1:
 
-    df_overview = df_cleaned.copy()
-    df_overview['tr'] = df_overview['tr'].astype(int)
-    df_overview = df_overview.reset_index(drop = True)
-    # st.table(df_overview)
+    try:
+        df_overview = df_cleaned.copy()
+        df_overview['tr'] = df_overview['tr'].astype(int)
+        df_overview = df_overview.reset_index(drop = True)
+        # st.table(df_overview)
 
-    col1, col2, col3 = st.columns([1, 8, 1])
+        col1, col2, col3 = st.columns([1, 8, 1])
 
-    with col2:
+        with col2:
 
-        styled_df = plot_overview(df_overview, mode, selected_approach)
+            styled_df = plot_overview(df_overview, mode, selected_approach)
 
-    col1, col2, col3 = st.columns([1, 1.5, 1])
-    with col2:
-        st.dataframe(styled_df, use_container_width=True, hide_index=True)
-
+        col1, col2, col3 = st.columns([1, 1.5, 1])
+        with col2:
+            st.dataframe(styled_df, use_container_width=True, hide_index=True)
+    except:
+        pass
 
 
 with tab2:
     if selected_approach == "Ensemble":
         df_ensembled = read_from_pickle(df_avg[f'{mode}_output'])
+        print("&&&&&&&&&&&&&&&&")
+        print(df_avg.head())
+        df_ensembled = read_from_pickle(df_avg[f'test_output'])
         # Create columns for the radio buttons to arrange them horizontally
         col1, col2, col3, col4, col5, col6, col7 , col8 = st.columns(8)
 
@@ -266,132 +275,125 @@ with tab2:
             fig = plot_ensemble(df_ensembled)
             st.plotly_chart(fig, use_container_width=True)
 
-        # with col1:      
-        #     if selected_approach == "Ensemble":
-                
-        #         df_ensembled = read_from_pickle(df_avg[f'{mode}_output'])
-
-
-
-        #         fig = plot_ensemble(df_ensembled)
-        #         st.plotly_chart(fig, use_container_width=True)
-
     else:
-        fig = plot_interactive_boxplots_with_outliers(df)
-        st.plotly_chart(fig, use_container_width=True)
-
-        st.divider()
-        # Display each formulation using LaTeX formatting
-        # st.latex(r"\Delta_X = pred_0 - true_0")
-        # st.latex(r"\Delta_Y = pred_1 - true_1")
-        # st.latex(r"\Delta_Z = pred_2 - true_2")
-        # st.latex(r"Euc\_dis = \sqrt{(\Delta_0)^2 + (\Delta_1)^2 + (\Delta_2)^2}")
-        # st.latex(r"L1 = |\Delta_x| + |\Delta_y| + |\Delta_z|")
-        # st.latex(r"L2 = \sqrt{(\Delta_x^2 + \Delta_y^2 + \Delta_z^2)}")
-
+        try:
+            fig = plot_interactive_boxplots_with_outliers(df)
+            st.plotly_chart(fig, use_container_width=True)
+            st.divider()
+        except:
+            pass
 
 with tab3:
 
         # Use columns with specific ratios for better spacing
     col1, col2, col3 = st.columns([1,0.1, 4])
+    try:
 
-    with col1:
-        selected_image_type = st.radio("Select Image Type", [ "Dose", "CT"])
-        st.divider()
-        available_colormaps = ['viridis', 'gray', 'binary', 'jet', ]
-        selected_colormap = st.selectbox("Select Color Palette", available_colormaps)
+        with col1:
+            selected_image_type = st.radio("Select Image Type", ["CT","Dose"])
+            st.divider()
+            available_colormaps = ['viridis', 'gray', 'binary', 'jet', ]
+            selected_colormap = st.selectbox("Select Color Palette", available_colormaps)
 
-        # Define the scaling factor based on the selected image type
-        if selected_image_type == "CT":
-            scaling_factor = 100.0  # No scaling for CT
-            filtered_data['fixed'] = filtered_data['fixed'].replace('/nrrd/', '/ct_nrrd/')
-            filtered_data['moving'] = filtered_data['moving'].replace('/nrrd/', '/ct_nrrd/')
-        elif selected_image_type == "Dose":
-            scaling_factor = 1000.0  # Scale for Dose images
-            filtered_data['fixed'] = filtered_data['fixed'].replace('/ct_nrrd/', '/nrrd/')
-            filtered_data['moving'] = filtered_data['moving'].replace('/ct_nrrd/', '/nrrd/')
+            # Define the scaling factor based on the selected image type
+            if selected_image_type == "CT":
+                scaling_factor = 100.0  # No scaling for CT
+                filtered_data['fixed'] = filtered_data['fixed'].replace('/nrrd/', '/ct_nrrd/')
+                filtered_data['moving'] = filtered_data['moving'].replace('/nrrd/', '/ct_nrrd/')
+            elif selected_image_type == "Dose":
+                scaling_factor = 1000.0  # Scale for Dose images
+                filtered_data['fixed'] = filtered_data['fixed'].replace('/ct_nrrd/', '/nrrd/')
+                filtered_data['moving'] = filtered_data['moving'].replace('/ct_nrrd/', '/nrrd/')
 
-        data = making_array(filtered_data.iloc[0].to_dict(), selected_image_type)
-        fixed_CT_array, _, _, _, _, _ = data
-        max_slice_index  = fixed_CT_array.shape[0] - 1
-        st.divider()
-        slice_index = st.slider("Select Slice Index", min_value=0, max_value=max_slice_index, value=max_slice_index // 2)
 
-    with col3:
-        try:
+
+                print("******")
+                filtered_data_row = filtered_data.iloc[0].to_dict()  # Assuming you have one filtered data row as shown
+                dose_generator = DoseGenerator(filtered_data_row)
+                dose_generator.process()
+
+            data = making_array(filtered_data.iloc[0].to_dict(), selected_image_type)
+            fixed_CT_array, _, _, _, _, _ = data
+            max_slice_index  = fixed_CT_array.shape[0] - 1
+            st.divider()
+            slice_index = st.slider("Select Slice Index", min_value=0, max_value=max_slice_index, value=max_slice_index // 2)
+
+        with col3:
             fig = plot_img(data, slice_index, colormap=selected_colormap, scaling_factor=scaling_factor)
             st.pyplot(fig)
-        except:
-            st.markdown("<p class='centered-lowered-text'>No data available to show.<br>Click on 'Compare' for displaying!</p>", unsafe_allow_html=True)
+    except:
+        st.markdown("<p class='centered-lowered-text'>No data available to show.<br>Select an outlier!</p>", unsafe_allow_html=True)
 
 
 
 with tab4:
-    st.markdown("Descriptive Statistics")
-    desc_stats = df[['0_dis', '1_dis', '2_dis', 'Euc_dis', 'L1_dis', 'L2_dis']].describe().T
-    st.dataframe(desc_stats)
+    try:
+        st.markdown("Descriptive Statistics")
+        desc_stats = df[['0_dis', '1_dis', '2_dis', 'Euc_dis', 'L1_dis', 'L2_dis']].describe().T
+        st.dataframe(desc_stats)
 
-    st.divider()
-    st.markdown("""
-        ### Z-Score Analysis Table
+        st.divider()
+        st.markdown("""
+            ### Z-Score Analysis Table
 
-        The Z-Score analysis for each of the distance metrics.
-        
-        - **The Z-Score** is a statistical measure that indicates how far each measurement deviates from the average value across all data points.
+            The Z-Score analysis for each of the distance metrics.
+            
+            - **The Z-Score** is a statistical measure that indicates how far each measurement deviates from the average value across all data points.
 
-        - **Filtering Outliers**: Any data points with a Z-score greater than 3 or less than -3 are considered statistical outliers.
-        
-        - **Z-Score Formula**: 
-    """)
+            - **Filtering Outliers**: Any data points with a Z-score greater than 3 or less than -3 are considered statistical outliers.
+            
+            - **Z-Score Formula**: 
+        """)
 
-    # Display the Z-score formula using st.latex
-    st.latex(r'''Z = \frac{X - \mu}{\sigma}''')
+        # Display the Z-score formula using st.latex
+        st.latex(r'''Z = \frac{X - \mu}{\sigma}''')
 
-    st.markdown("""
-        Where:
-        - \( X \) is the value in the dataset. mu is the mean of the dataset. sigma is the standard deviation of the dataset.
-    """)
+        st.markdown("""
+            Where:
+            - \( X \) is the value in the dataset. mu is the mean of the dataset. sigma is the standard deviation of the dataset.
+        """)
 
-    # Calculate Z-Scores for each distance metric
-    for col in ['0_dis', '1_dis', '2_dis', 'Euc_dis', 'L1_dis', 'L2_dis']:
-        df[f'z_{col}'] = (df[col] - df[col].mean()) / df[col].std()
+        # Calculate Z-Scores for each distance metric
+        for col in ['0_dis', '1_dis', '2_dis', 'Euc_dis', 'L1_dis', 'L2_dis']:
+            df[f'z_{col}'] = (df[col] - df[col].mean()) / df[col].std()
 
-    # Filter outliers where any Z-score exceeds 3
-    outliers = df[(abs(df['z_0_dis']) > 3) | 
-                (abs(df['z_1_dis']) > 3) | 
-                (abs(df['z_2_dis']) > 3) | 
-                (abs(df['z_Euc_dis']) > 3) | 
-                (abs(df['z_L1_dis']) > 3) | 
-                (abs(df['z_L2_dis']) > 3)]
+        # Filter outliers where any Z-score exceeds 3
+        outliers = df[(abs(df['z_0_dis']) > 3) | 
+                    (abs(df['z_1_dis']) > 3) | 
+                    (abs(df['z_2_dis']) > 3) | 
+                    (abs(df['z_Euc_dis']) > 3) | 
+                    (abs(df['z_L1_dis']) > 3) | 
+                    (abs(df['z_L2_dis']) > 3)]
 
-    # Reorder columns: Z-score columns first, then other relevant columns
-    columns_order = [f'z_{col}' for col in ['0_dis', '1_dis', '2_dis', 'Euc_dis', 'L1_dis', 'L2_dis']] + \
-                    [col for col in df.columns if col not in [f'z_{col}' for col in ['0_dis', '1_dis', '2_dis', 'Euc_dis', 'L1_dis', 'L2_dis']] + ['fixed', 'PatientID', 'pred_0', 'pred_1', 'pred_2', 'true_0', 'true_1', 'true_2']]
+        # Reorder columns: Z-score columns first, then other relevant columns
+        columns_order = [f'z_{col}' for col in ['0_dis', '1_dis', '2_dis', 'Euc_dis', 'L1_dis', 'L2_dis']] + \
+                        [col for col in df.columns if col not in [f'z_{col}' for col in ['0_dis', '1_dis', '2_dis', 'Euc_dis', 'L1_dis', 'L2_dis']] + ['fixed', 'PatientID', 'pred_0', 'pred_1', 'pred_2', 'true_0', 'true_1', 'true_2']]
 
-    outliers = outliers[columns_order]
+        outliers = outliers[columns_order]
 
-    # Apply a function to color the outlier cells
-    def highlight_outliers(val):
-        color = 'orange' if abs(val) > 3 else ''
-        return f'background-color: {color}'
+        # Apply a function to color the outlier cells
+        def highlight_outliers(val):
+            color = 'orange' if abs(val) > 3 else ''
+            return f'background-color: {color}'
 
-    # Apply the style to the filtered outliers DataFrame
-    styled_outliers = outliers.style.applymap(highlight_outliers, subset=[f'z_{col}' for col in ['0_dis', '1_dis', '2_dis', 'Euc_dis', 'L1_dis', 'L2_dis']])
+        # Apply the style to the filtered outliers DataFrame
+        styled_outliers = outliers.style.applymap(highlight_outliers, subset=[f'z_{col}' for col in ['0_dis', '1_dis', '2_dis', 'Euc_dis', 'L1_dis', 'L2_dis']])
 
-    # Display the styled DataFrame as HTML
-    st.write(styled_outliers.to_html(), unsafe_allow_html=True)
-
-
-    st.divider()
-    st.subheader("Correlation Matrix")
-
-    # Compute the correlation matrix
-    corr_matrix = df[['0_dis', '1_dis', '2_dis', 'Euc_dis', 'L1_dis', 'L2_dis']].corr()
-
-    # Apply a colormap to the DataFrame
-    corr_styled = corr_matrix.style.background_gradient(cmap='coolwarm', axis=None).format(precision=2)
-
-    # Display the styled correlation matrix in Streamlit
-    st.dataframe(corr_styled)
+        # Display the styled DataFrame as HTML
+        st.write(styled_outliers.to_html(), unsafe_allow_html=True)
 
 
+        st.divider()
+        st.subheader("Correlation Matrix")
+
+        # Compute the correlation matrix
+        corr_matrix = df[['0_dis', '1_dis', '2_dis', 'Euc_dis', 'L1_dis', 'L2_dis']].corr()
+
+        # Apply a colormap to the DataFrame
+        corr_styled = corr_matrix.style.background_gradient(cmap='coolwarm', axis=None).format(precision=2)
+
+        # Display the styled correlation matrix in Streamlit
+        st.dataframe(corr_styled)
+
+    except:
+        pass

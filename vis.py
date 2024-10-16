@@ -358,6 +358,7 @@ def transform_moving_ct(moving_CT_image, fixed_CT_image, coordination, pixdim):
     return transformed_moving_CT_array_updated
 
 
+
 def making_array(outlier, selected_image_type):
 
     if selected_image_type == "CT":
@@ -386,6 +387,39 @@ def making_array(outlier, selected_image_type):
     difference_pred = transformed_moving_CT_array_pred - fixed_CT_array
 
     return fixed_CT_array, moving_CT_array, transformed_moving_CT_array_true, difference_true, transformed_moving_CT_array_pred, difference_pred
+
+# def making_array(outlier, selected_image_type):
+
+#     if selected_image_type == "CT":
+#         outlier['fixed'] = outlier['fixed'].replace('/nrrd/', '/ct_nrrd/')
+#         outlier['moving'] = outlier['moving'].replace('/nrrd/', '/ct_nrrd/')
+    
+#     fixed_CT_image = itk.imread(outlier['fixed']) 
+#     moving_CT_image = itk.imread(outlier['moving'])  # Load the moving image
+
+#     # True and predicted coordinates from the outlier data
+#     true_coords = [outlier['true_0'], outlier['true_1'], outlier['true_2']]
+#     pred_coords = [outlier['pred_0'], outlier['pred_1'], outlier['pred_2']]
+#     pixdim = fixed_CT_image.GetSpacing()  # Assuming the pixel dimensions are the same for both images
+
+#     # Transform the moving image based on true coordinates
+#     transformed_moving_CT_array_true = transform_moving_ct(
+#                     moving_CT_image, fixed_CT_image, true_coords, pixdim)
+#     # Transform the moving image based on predicted coordinates
+#     transformed_moving_CT_array_pred = transform_moving_ct(
+#                     moving_CT_image, fixed_CT_image, pred_coords, pixdim)
+
+#     # Calculate the difference between the fixed image and transformed moving images (true and predicted coordinates)
+#     fixed_CT_array = itk.array_view_from_image(fixed_CT_image).astype(int)
+#     moving_CT_array = itk.array_view_from_image(moving_CT_image).astype(int)
+#     difference_true = transformed_moving_CT_array_true - fixed_CT_array
+#     difference_pred = transformed_moving_CT_array_pred - fixed_CT_array
+
+#     return fixed_CT_array, moving_CT_array, transformed_moving_CT_array_true, difference_true, transformed_moving_CT_array_pred, difference_pred
+
+
+
+
 
 
 def plot_img(data, slice_index, colormap, scaling_factor):
@@ -581,6 +615,7 @@ def plot_overview(df_overview, mode, selected_approach):
         df_overview_clean['esm'] = pd.to_numeric(df_overview_clean['esm'], errors='coerce')
         df_overview_sorted = df_overview_clean.sort_values(by='esm', ascending=True)
         df_overview_sorted[['avg_train_loss', 'avg_val_loss', 'avg_test_loss']] = df_overview_sorted[['avg_train_loss', 'avg_val_loss', 'avg_test_loss']].apply(lambda x: x.round(3).astype(str))
+        df_overview_sorted = df_overview_sorted.rename(columns={'esm': 'Ensemble', 'tr': 'Trial'})
 
         styled_df = highlight_min_max(df_overview_sorted, ['avg_train_loss', 'avg_val_loss', 'avg_test_loss'])
     
@@ -600,6 +635,7 @@ def plot_overview(df_overview, mode, selected_approach):
         df_overview_clean['esm'] = pd.to_numeric(df_overview_clean['esm'], errors='coerce')
         df_overview_sorted = df_overview_clean.sort_values(by=['esm', 'tr'] , ascending=True)
         df_overview_sorted[['train_loss', 'val_loss', 'test_loss']] = df_overview_sorted[['train_loss', 'val_loss', 'test_loss']].apply(lambda x: x.round(3).astype(str))
+        df_overview_sorted = df_overview_sorted.rename(columns={'esm': 'Ensemble', 'tr': 'Trial'})
 
         styled_df = highlight_min_max(df_overview_sorted, ['train_loss', 'val_loss', 'test_loss'])
 

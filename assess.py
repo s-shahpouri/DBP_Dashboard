@@ -1,13 +1,313 @@
-
-
-import plotly.graph_objs as go
-from plotly.subplots import make_subplots
-
 import plotly.graph_objs as go
 from plotly.subplots import make_subplots
 import numpy as np
 import re
 import pandas as pd
+import os
+import shutil
+from Libs.run_mqi import run_mqi
+from Libs.construct_dict_mqi_input_parameters import construct_dict_mqi_input_parameters
+from Libs.construct_dose_dcm_mqi import construct_dose_dcm_mqi
+import json
+import SimpleITK as sitk
+from Libs.CT import construct_CT_object
+from Libs.resample_and_override_CT import get_structures_with_override
+import subprocess
+import glob
+class DoseGenerator:
+    def __init__(self, filtered_data_row, moqui_path='/data/sama/Gabriel_inf/computeDoseMoqui', raw_data_dir='/data/bahrdoh/Datasets/Raw_data', reg_dir='/data/bahrdoh/Datasets/pat_reg'):
+        self.row = filtered_data_row
+        self.reg_dir = reg_dir
+        self.moqui_path = moqui_path
+        self.raw_data_dir = raw_data_dir
+        self.root_mqi_binary = os.path.join(moqui_path, "Moqui")
+        self.name_mqi_binary = 'moqui'
+        self.patient_id = f"DBP_{self.row['PatientID']}"
+
+    def generate_dose_paths(self):
+        # Extract necessary values from the filtered data row
+        
+
+        patient_id_with_diffs = self.row['PatientID_with_diffs']
+
+        parts = patient_id_with_diffs.split('_')
+        if len(parts) >= 3:
+            self.rct_part = parts[2]  # e.g., 'rCTp17'
+            iter_part = parts[1]  # e.g., 'Iter8'
+            sanitized_value = f"X_{parts[-1].split('(')[-1].replace(')', '')}"
+        else:
+            raise ValueError("Invalid format for PatientID_with_diffs")
+
+        main_dose_path = '/data/sama/Datasets/Dash_data/Dose_outlier'
+        dose_fixed_path = os.path.join(main_dose_path, self.patient_id, 'pCTp0')
+        dose_moving_path = os.path.join(main_dose_path, self.patient_id, iter_part, self.rct_part, sanitized_value)
+
+        # Ensure directories exist
+        os.makedirs(dose_fixed_path, exist_ok=True)
+        os.makedirs(dose_moving_path, exist_ok=True)
+
+        self.dose_fixed_path = dose_fixed_path
+        self.dose_moving_path = dose_moving_path
+
+        self.row['dose_moving'] = dose_moving_path
+        self.row['dose_fixed'] = dose_fixed_path
+        print(self.row)
+
+
+    def generate_ct_objects(self):
+        # Construct the data dictionary for patient and rCT
+
+        
+        # Extract CT structure directories for pCT and rCT
+        pCT_struct_dirs = self.data_dict.get('pCTp0')
+        rCT_struct_dirs = self.data_dict.get(self.rct_part)
+
+        if not pCT_struct_dirs or not rCT_struct_dirs:
+            raise ValueError("Missing data for pCT or rCT in data_dict.")
+
+        # Construct CT objects for pCT and rCT
+        
+        CT_object_moving, externalROI_moving, overrideROIs_moving = self.construct_ct_obj(rCT_struct_dirs)
+
+        if CT_object_moving is None:
+            raise ValueError("Failed to create CT object for rCT.")
+    
+        self.CT_object_moving = CT_object_moving
+        self.externalROI_moving = externalROI_moving
+        self.overrideROIs_moving = overrideROIs_moving
+
+    def run_dose_calculation(self):
+        self.start_time = time.time()
+        # Run the dose calculation for the moving CT object
+        mq_dose_dir = os.path.join(self.dose_moving_path, "Dose_output")
+        os.makedirs(mq_dose_dir, exist_ok=True)
+
+        # Construct the input parameters for MQI
+        mqi_input_parameters = construct_dict_mqi_input_parameters(
+            self.dose_moving_path, "", 
+            output_dir=mq_dose_dir, 
+            GPUID=1, 
+            particles_per_history=100000
+        )
+
+        if self.CT_object_moving is not None:
+            print(f"Attributes of CT Object Moving: {dir(self.CT_object_moving)}")
+        else:
+            print("CT Object Moving is None")
+
+
+        # Run MQI using the correct call and handle potential failures gracefully
+        try:
+            run_mqi(
+                self.root_mqi_binary,
+                self.name_mqi_binary,
+                mqi_input_parameters,
+                rerun=True
+            )
+        except subprocess.CalledProcessError as e:
+            print(f"Run MQI failed after several attempts: {e}")
+            raise RuntimeError("MQI run failed. Aborting further processing.")
+
+        # Debugging: Check input file contents
+        input_file_path = os.path.join(mq_dose_dir, "input_file.in")
+        if os.path.exists(input_file_path):
+            with open(input_file_path, "r") as infile:
+                input_content = infile.read()
+                print("Input File Contents:")
+                print(input_content)
+
+        # Save dose DICOM
+        try:
+            construct_dose_dcm_mqi(
+                mq_dose_dir,
+                self.CT_object_moving.reference_dcm,
+                frame_of_reference_uid=self.CT_object_moving.frame_of_reference_UID
+            )
+        except Exception as e:
+            print(f"Error saving dose DICOM: {e}")
+            raise
+
+        print(f"Dose image generated and saved to {mq_dose_dir}")
+
+
+
+
+    def make_data_dict(self):
+        raw_data_dir = self.raw_data_dir
+
+        # Initialize data_dict as an empty dictionary
+        self.data_dict = {}
+
+        pCTp0_path = os.path.join(raw_data_dir, self.patient_id, 'pCTp0')
+        if os.path.exists(pCTp0_path):
+            pCT_struct_dir = glob.glob(os.path.join(pCTp0_path, "RS*.dcm"))
+            if pCT_struct_dir:
+                self.data_dict['pCTp0'] = {
+                    'ct_dir': pCTp0_path,
+                    'struct_dir': pCT_struct_dir[0]
+                }
+            else:
+                print(f"No structure files found.")
+        else:
+            print(f"{pCTp0_path} does not exist!!!!")
+
+        # Construct the path for the rCT
+        rct_path = os.path.join(raw_data_dir, self.patient_id, self.rct_part)
+        if os.path.exists(rct_path):
+            struct_dir = glob.glob(os.path.join(rct_path, "RS*.dcm"))
+            if struct_dir:
+                dose_dir = glob.glob(os.path.join(raw_data_dir, self.patient_id, 'A1PHH', "RD*.dcm"))
+                plan_dir = glob.glob(os.path.join(raw_data_dir, self.patient_id, 'A1PHH', "RP*.dcm"))
+                self.data_dict[self.rct_part] = {
+                    'ct_dir': rct_path,
+                    'struct_dir': struct_dir[0],
+                    'dose_dir': dose_dir[0] if dose_dir else None,
+                    'plan_dir': plan_dir[0] if plan_dir else None
+                }
+            else:
+                print(f"No structure files found in {rct_path}")
+        else:
+            print(f"{rct_path} does not exist!!!!")
+
+        self.add_reg_dir()  # Add registration information to the dictionary
+        print("UPDATING DONE !!!!")
+        return self.data_dict  # Return the updated data_dict
+
+
+
+    def add_reg_dir(self):
+        reg_dir_list = glob.glob(os.path.join(self.reg_dir, "*.json"))
+
+        for reg_file in reg_dir_list:
+            string_list = reg_file.split('/')
+            pat_id = string_list[-1][:9]  # Assumes the patient ID can be extracted this way
+            
+            if pat_id == self.patient_id:
+                self.row['reg_dir'] = reg_file
+                break
+
+
+
+    def new_transfer_param(self, rig_matrix):
+
+        trans_values={'x': self.row['pred_0'], 'y': self.row['pred_1'], 'z': self.row['pred_2']}
+        matrix = rig_matrix.copy()
+        final_translation_coordinate = {'x': 0, 'y': 0, 'z': 0}  # Initialize the dictionary
+
+        for idx, key in zip([3, 7, 11], ['x', 'y', 'z']): 
+
+            matrix[idx] = (matrix[idx] + trans_values) * 10  # Make the new translation
+            final_translation_coordinate[key] = trans_values * 10  # Store the translation
+
+        return matrix, final_translation_coordinate
+
+
+
+    def register_ct_struct(self):
+        inf = self.data_dict[self.rct_part]
+        # Load reference dose image
+        ref_sitk = sitk.ReadImage(inf['dose_dir'])
+
+        # Print dimensions before registration
+        print(f"Before Registration: Reference image (dose) dimensions: {ref_sitk.GetSize()}")
+        for roi_name, mask in self.CT_object_moving.masks_structures.items():
+            print(f"Before Registration: Mask '{roi_name}' dimensions: {mask.shape}")
+
+        # Check if registration data is available
+        if 'reg_dir' in inf:
+            with open(self.row['reg_dir']) as f:
+                reg_file = json.load(f)
+
+
+            # Extract registration matrix and frame of reference UID
+            registration_matrix = np.array(reg_file['examinations'][self.rct_part]['registration_to_planning_examinations']['A1PHH']['rigid_transformation_matrix'])
+            # print("Extracted registration matrix:", registration_matrix)
+            # registration_matrix = np.array(registration_matrix).reshape(4, 4)
+            # # Ensure the matrix is 4x4
+            # if registration_matrix.shape != (4, 4):
+            #     raise ValueError(f"Invalid transformation matrix shape: {registration_matrix.shape}, expected 4x4")
+
+            frame_of_uid = reg_file['examinations'][self.rct_part]['equipment_info']['frame_of_reference']
+
+            # Apply transformation and update the final dictionary
+            new_matrix, final_translation_coordinate = self.new_transfer_param(registration_matrix)
+
+            # Apply transformation and resample the CT object
+            self.CT_object_moving.transform_and_resample(transformation_matrix=new_matrix, reference_sitk=ref_sitk, new_FoR_UID=frame_of_uid)
+
+            # Print dimensions after transformation and resampling
+            for roi_name, mask in self.CT_object_moving.masks_structures.items():
+                print(f"After Resampling: Mask '{roi_name}' dimensions: {mask.shape}")
+        else:
+            print(f"No registration file found for {self.rct_part}, skipping registration.")
+            self.CT_object_moving.resample(reference_sitk=ref_sitk, square_slices=False)
+
+            # Print dimensions after resampling (without transformation)
+            for roi_name, mask in self.CT_object_moving.masks_structures.items():
+                print(f"After Resampling: Mask '{roi_name}' dimensions: {mask.shape}")
+
+        # Apply overrides
+        self.CT_object_moving.override(self.externalROI_moving, self.overrideROIs_moving)
+        print(self.row)
+
+        # Print final CT dimensions after override
+        print(f"After Override: CT image dimensions: {sitk.GetArrayFromImage(self.CT_object_moving.image).shape}")
+
+        # Save the updated CT object
+        self.CT_object_moving.save(self.dose_moving_path, save_struct_file=True)
+        shutil.copy2(inf['plan_dir'], self.dose_moving_path)
+
+
+    def construct_ct_obj(self, ct_struct_dirs):
+
+        # Get structures with override information
+        externalROI, overrideROIs = get_structures_with_override(self.moqui_path,  ct_struct_dirs['struct_dir'])
+        roi_names = [externalROI['ROIObservationLabel']] + [struct['ROIObservationLabel'] for struct in overrideROIs] + ["CTV_7000", "CTV_5425"]
+        roi_names = list(set(roi_names))
+        
+        if 'Vullingen-implan' in roi_names:
+            roi_names.remove('Vullingen-implan')
+
+        print(ct_struct_dirs['ct_dir'], ct_struct_dirs['struct_dir'], roi_names)
+        # Construct the CT object only if valid DICOM files are present
+        CT_object = construct_CT_object('CT', ct_struct_dirs['ct_dir'], ct_struct_dirs['struct_dir'], roi_names = roi_names)
+        return CT_object, externalROI, overrideROIs
+    
+
+
+
+    def process(self):
+        try:
+            # Generate dose paths
+            self.generate_dose_paths()
+            print("0000 done")
+
+            # Make the data dictionary
+            self.data_dict = self.make_data_dict()
+            print("1111 done")
+
+            # Generate CT objects
+            self.generate_ct_objects()
+            print("222 done")
+
+            # Register and adjust CT object
+            self.register_ct_struct()
+            print("333 done - registration finished")
+
+            # Run dose calculation
+            self.run_dose_calculation()
+            
+            print("Dose calculation finished: ", time.time() - self.start_time)
+
+
+        except Exception as e:
+            print(f"Error in processing dose generation: {e}")
+
+
+import time
+
+
+
 
 
 class OutlierDetector:
@@ -102,9 +402,16 @@ class OutlierDetector:
         """
         if self.outliers_df is None:
             raise ValueError("Outliers have not been computed. Call `compute_outliers` first.")
+        # Filter outliers based on the selected mode key
+        filtered_outliers_df = self.outliers_df[self.outliers_df['type'] == selected_mode_key].copy()
         
-        # Filter the outliers DataFrame based on the selected mode key
-        return self.outliers_df[self.outliers_df['type'] == selected_mode_key]
+        # Initialize new columns with empty strings
+        filtered_outliers_df.loc[:, 'dose_fixed'] = ""
+        filtered_outliers_df.loc[:, 'dose_moving'] = ""
+
+
+        return filtered_outliers_df
+
 
     def get_outlier_options(self, filtered_outliers_df):
         """
@@ -119,6 +426,11 @@ class OutlierDetector:
         self.compute_outliers()  # Compute outliers for all axes/metrics
         self.append_differences_to_patient_id(selected_mode_key)  # Append the selected axis difference
         return self.df
+
+
+
+
+
 
 
 class PathName:
