@@ -71,21 +71,48 @@ class CT(object):
         self.KVP = KVP
 
 
-    def transform_and_resample(self, transformation_matrix, reference_sitk, new_FoR_UID, interpolator=sitk.sitkNearestNeighbor, default_pixel_value_CT=-1000):
-        # Print dimensions before transformation and resampling
-        print(f"Before Resample: CT image dimensions: {sitk.GetArrayFromImage(self.image).shape}")
+    # def transform_and_resample(self, transformation_matrix, reference_sitk, new_FoR_UID, interpolator=sitk.sitkNearestNeighbor, default_pixel_value_CT=-1000):
+    #     # Print dimensions before transformation and resampling
+    #     print(f"Before Resample: CT image dimensions: {sitk.GetArrayFromImage(self.image).shape}")
         
+    #     transform = construct_sitk_transform_object_from_transformation_matrix(transformation_matrix)
+    #     resampler = sitk.ResampleImageFilter()
+    #     resampler.SetReferenceImage(reference_sitk)
+    #     resampler.SetInterpolator(interpolator)
+    #     resampler.SetTransform(transform.GetInverse())
+        
+    #     # Resample CT image
+    #     resampler.SetDefaultPixelValue(default_pixel_value_CT)
+    #     self.image = resampler.Execute(self.image)
+
+    #     # Resample each mask in the RTStruct (stored in masks_structures)
+    #     for roi_name, mask in self.masks_structures.items():
+    #         mask_image = sitk.GetImageFromArray(mask.astype(int))
+    #         mask_image.SetOrigin(self.image.GetOrigin())
+    #         mask_image.SetSpacing(self.image.GetSpacing())
+    #         resampled_mask_image = resampler.Execute(mask_image)
+    #         self.masks_structures[roi_name] = sitk.GetArrayFromImage(resampled_mask_image).astype(bool)
+
+    #     self.frame_of_reference_UID = new_FoR_UID
+    #     self.image.SetOrigin(reference_sitk.GetOrigin())
+    #     self.image.SetSpacing(reference_sitk.GetSpacing())
+        
+    #     # Print dimensions after resampling
+    #     print(f"After Resample: CT image dimensions: {sitk.GetArrayFromImage(self.image).shape}")
+    #     for roi_name, mask in self.masks_structures.items():
+    #         print(f"After Resample: Mask '{roi_name}' dimensions: {mask.shape}")
+
+
+    def transform_and_resample(self, transformation_matrix, reference_sitk, new_FoR_UID, interpolator = sitk.sitkNearestNeighbor, default_pixel_value_CT = -1000):
+
         transform = construct_sitk_transform_object_from_transformation_matrix(transformation_matrix)
+        
         resampler = sitk.ResampleImageFilter()
         resampler.SetReferenceImage(reference_sitk)
         resampler.SetInterpolator(interpolator)
         resampler.SetTransform(transform.GetInverse())
-        
-        # Resample CT image
-        resampler.SetDefaultPixelValue(default_pixel_value_CT)
-        self.image = resampler.Execute(self.image)
 
-        # Resample each mask in the RTStruct (stored in masks_structures)
+        resampler.SetDefaultPixelValue(0)
         for roi_name, mask in self.masks_structures.items():
             mask_image = sitk.GetImageFromArray(mask.astype(int))
             mask_image.SetOrigin(self.image.GetOrigin())
@@ -93,15 +120,13 @@ class CT(object):
             resampled_mask_image = resampler.Execute(mask_image)
             self.masks_structures[roi_name] = sitk.GetArrayFromImage(resampled_mask_image).astype(bool)
 
+        resampler.SetDefaultPixelValue(default_pixel_value_CT)
+        self.image = resampler.Execute(self.image)
         self.frame_of_reference_UID = new_FoR_UID
         self.image.SetOrigin(reference_sitk.GetOrigin())
         self.image.SetSpacing(reference_sitk.GetSpacing())
-        
-        # Print dimensions after resampling
-        print(f"After Resample: CT image dimensions: {sitk.GetArrayFromImage(self.image).shape}")
-        for roi_name, mask in self.masks_structures.items():
-            print(f"After Resample: Mask '{roi_name}' dimensions: {mask.shape}")
 
+        
     def resample(self, reference_sitk=None, new_spacing=[3, 3, 3], interpolator=sitk.sitkNearestNeighbor, default_pixel_value_CT=-1000, square_slices=True):
         # Print dimensions before resampling
         print(f"Before Resample: CT image dimensions: {sitk.GetArrayFromImage(self.image).shape}")

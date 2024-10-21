@@ -13,6 +13,7 @@ from plotly.subplots import make_subplots
 from wordcloud import WordCloud
 import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
+import SimpleITK as sitk
 
 
 
@@ -332,6 +333,7 @@ def plot_side_by_side(df1, df2, column_name, title1, title2):
     return fig
 
     
+
 def transform_moving_ct(moving_CT_image, fixed_CT_image, coordination, pixdim):
     if len(coordination) != 3:
         raise ValueError(f"Expected coordination of length 3, but got {len(coordination)}")
@@ -341,21 +343,24 @@ def transform_moving_ct(moving_CT_image, fixed_CT_image, coordination, pixdim):
     moving_CT_image.SetSpacing(pixdim)
 
     # Define the translation transformation
-    translation_updated = itk.TranslationTransform[itk.D, 3].New()
-    translation_updated.SetOffset(np.array(
-                        [coordination[2], coordination[1], coordination[0]],dtype=np.float64))
+    translation_updated = sitk.TranslationTransform(3)  # 3D translation
+    translation_updated.SetOffset([coordination[2], coordination[1], coordination[0]])
 
     # Resample the moving image with the transformation
-    resampler_updated = itk.ResampleImageFilter.New(
-                        Input=moving_CT_image, Transform=translation_updated,
-                        UseReferenceImage=True, ReferenceImage=fixed_CT_image)
-    resampler_updated.SetInterpolator(itk.LinearInterpolateImageFunction.New(fixed_CT_image))
+    resampled_moving_image = sitk.Resample(
+        moving_CT_image,                # The image to be resampled (moving image)
+        fixed_CT_image,                 # The reference image (for size, spacing, etc.)
+        translation_updated,            # The translation transformation
+        sitk.sitkLinear,                # Interpolation method (linear interpolation)
+        0,                              # Default pixel value for out-of-bounds areas
+        moving_CT_image.GetPixelID()    # Ensure the output has the same pixel type
+    )
 
-    resampler_updated.Update()
-    transformed_moving_CT_image_updated = resampler_updated.GetOutput()
-    transformed_moving_CT_array_updated = itk.array_view_from_image(transformed_moving_CT_image_updated).astype(int)
+    # Convert the transformed image to a NumPy array
+    transformed_moving_CT_array_updated = sitk.GetArrayViewFromImage(resampled_moving_image).astype(int)
 
     return transformed_moving_CT_array_updated
+
 
 
 
@@ -364,9 +369,16 @@ def making_array(outlier, selected_image_type):
     if selected_image_type == "CT":
         outlier['fixed'] = outlier['fixed'].replace('/nrrd/', '/ct_nrrd/')
         outlier['moving'] = outlier['moving'].replace('/nrrd/', '/ct_nrrd/')
-    
-    fixed_CT_image = itk.imread(outlier['fixed']) 
-    moving_CT_image = itk.imread(outlier['moving'])  # Load the moving image
+        fixed_CT_image = sitk.ReadImage(outlier['fixed']) 
+        moving_CT_image = sitk.ReadImage(outlier['moving'])
+        pred_moving_CT_image = sitk.ReadImage(outlier['pred_ct_moving'])
+
+    if selected_image_type == "Dose":
+
+        fixed_CT_image =sitk.ReadImage(outlier['fixed']) 
+        moving_CT_image = sitk.ReadImage(outlier['moving'])
+        pred_moving_CT_image = sitk.ReadImage(outlier['pred_dose_moving'])
+
 
     # True and predicted coordinates from the outlier data
     true_coords = [outlier['true_0'], outlier['true_1'], outlier['true_2']]
@@ -378,45 +390,15 @@ def making_array(outlier, selected_image_type):
                     moving_CT_image, fixed_CT_image, true_coords, pixdim)
     # Transform the moving image based on predicted coordinates
     transformed_moving_CT_array_pred = transform_moving_ct(
-                    moving_CT_image, fixed_CT_image, pred_coords, pixdim)
+                    pred_moving_CT_image, fixed_CT_image, pred_coords, pixdim)
 
     # Calculate the difference between the fixed image and transformed moving images (true and predicted coordinates)
-    fixed_CT_array = itk.array_view_from_image(fixed_CT_image).astype(int)
-    moving_CT_array = itk.array_view_from_image(moving_CT_image).astype(int)
+    fixed_CT_array = sitk.GetArrayViewFromImage(fixed_CT_image).astype(int)
+    moving_CT_array = sitk.GetArrayViewFromImage(moving_CT_image).astype(int)
     difference_true = transformed_moving_CT_array_true - fixed_CT_array
     difference_pred = transformed_moving_CT_array_pred - fixed_CT_array
 
     return fixed_CT_array, moving_CT_array, transformed_moving_CT_array_true, difference_true, transformed_moving_CT_array_pred, difference_pred
-
-# def making_array(outlier, selected_image_type):
-
-#     if selected_image_type == "CT":
-#         outlier['fixed'] = outlier['fixed'].replace('/nrrd/', '/ct_nrrd/')
-#         outlier['moving'] = outlier['moving'].replace('/nrrd/', '/ct_nrrd/')
-    
-#     fixed_CT_image = itk.imread(outlier['fixed']) 
-#     moving_CT_image = itk.imread(outlier['moving'])  # Load the moving image
-
-#     # True and predicted coordinates from the outlier data
-#     true_coords = [outlier['true_0'], outlier['true_1'], outlier['true_2']]
-#     pred_coords = [outlier['pred_0'], outlier['pred_1'], outlier['pred_2']]
-#     pixdim = fixed_CT_image.GetSpacing()  # Assuming the pixel dimensions are the same for both images
-
-#     # Transform the moving image based on true coordinates
-#     transformed_moving_CT_array_true = transform_moving_ct(
-#                     moving_CT_image, fixed_CT_image, true_coords, pixdim)
-#     # Transform the moving image based on predicted coordinates
-#     transformed_moving_CT_array_pred = transform_moving_ct(
-#                     moving_CT_image, fixed_CT_image, pred_coords, pixdim)
-
-#     # Calculate the difference between the fixed image and transformed moving images (true and predicted coordinates)
-#     fixed_CT_array = itk.array_view_from_image(fixed_CT_image).astype(int)
-#     moving_CT_array = itk.array_view_from_image(moving_CT_image).astype(int)
-#     difference_true = transformed_moving_CT_array_true - fixed_CT_array
-#     difference_pred = transformed_moving_CT_array_pred - fixed_CT_array
-
-#     return fixed_CT_array, moving_CT_array, transformed_moving_CT_array_true, difference_true, transformed_moving_CT_array_pred, difference_pred
-
 
 
 

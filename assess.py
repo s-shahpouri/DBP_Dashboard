@@ -14,6 +14,10 @@ from Libs.CT import construct_CT_object
 from Libs.resample_and_override_CT import get_structures_with_override
 import subprocess
 import glob
+import time
+
+
+
 class DoseGenerator:
     def __init__(self, filtered_data_row, moqui_path='/data/sama/Gabriel_inf/computeDoseMoqui', raw_data_dir='/data/bahrdoh/Datasets/Raw_data', reg_dir='/data/bahrdoh/Datasets/pat_reg'):
         self.row = filtered_data_row
@@ -25,9 +29,6 @@ class DoseGenerator:
         self.patient_id = f"DBP_{self.row['PatientID']}"
 
     def generate_dose_paths(self):
-        # Extract necessary values from the filtered data row
-        
-
         patient_id_with_diffs = self.row['PatientID_with_diffs']
 
         parts = patient_id_with_diffs.split('_')
@@ -39,18 +40,18 @@ class DoseGenerator:
             raise ValueError("Invalid format for PatientID_with_diffs")
 
         main_dose_path = '/data/sama/Datasets/Dash_data/Dose_outlier'
-        dose_fixed_path = os.path.join(main_dose_path, self.patient_id, 'pCTp0')
-        dose_moving_path = os.path.join(main_dose_path, self.patient_id, iter_part, self.rct_part, sanitized_value)
+        ct_moving_path = os.path.join(main_dose_path, self.patient_id, iter_part, self.rct_part, sanitized_value, 'CT')
+        dose_moving_path = os.path.join(main_dose_path, self.patient_id, iter_part, self.rct_part, sanitized_value, 'Dose')
 
         # Ensure directories exist
-        os.makedirs(dose_fixed_path, exist_ok=True)
+        os.makedirs(ct_moving_path, exist_ok=True)
         os.makedirs(dose_moving_path, exist_ok=True)
 
-        self.dose_fixed_path = dose_fixed_path
-        self.dose_moving_path = dose_moving_path
+        self.ct_moving_path = ct_moving_path  # Ensure it's set here
+        self.dose_moving_path = dose_moving_path  # Ensure it's set here
 
         self.row['dose_moving'] = dose_moving_path
-        self.row['dose_fixed'] = dose_fixed_path
+        self.row['ct_moving'] = ct_moving_path
         print(self.row)
 
 
@@ -67,31 +68,27 @@ class DoseGenerator:
 
         # Construct CT objects for pCT and rCT
         
-        CT_object_moving, externalROI_moving, overrideROIs_moving = self.construct_ct_obj(rCT_struct_dirs)
+        CTobject, externalROI_moving, overrideROIs_moving = self.construct_ct_obj(rCT_struct_dirs)
 
-        if CT_object_moving is None:
+        if CTobject is None:
             raise ValueError("Failed to create CT object for rCT.")
     
-        self.CT_object_moving = CT_object_moving
+        self.CTobject = CTobject
         self.externalROI_moving = externalROI_moving
         self.overrideROIs_moving = overrideROIs_moving
 
     def run_dose_calculation(self):
-        self.start_time = time.time()
-        # Run the dose calculation for the moving CT object
-        mq_dose_dir = os.path.join(self.dose_moving_path, "Dose_output")
-        os.makedirs(mq_dose_dir, exist_ok=True)
-
+        
         # Construct the input parameters for MQI
         mqi_input_parameters = construct_dict_mqi_input_parameters(
-            self.dose_moving_path, "", 
-            output_dir=mq_dose_dir, 
+            self.ct_moving_path, "", 
+            output_dir=self.dose_moving_path, 
             GPUID=1, 
-            particles_per_history=100000
+            particles_per_history=10000
         )
 
-        if self.CT_object_moving is not None:
-            print(f"Attributes of CT Object Moving: {dir(self.CT_object_moving)}")
+        if self.CTobject is not None:
+            print(f"Attributes of CT Object Moving: {dir(self.CTobject)}")
         else:
             print("CT Object Moving is None")
 
@@ -109,7 +106,7 @@ class DoseGenerator:
             raise RuntimeError("MQI run failed. Aborting further processing.")
 
         # Debugging: Check input file contents
-        input_file_path = os.path.join(mq_dose_dir, "input_file.in")
+        input_file_path = os.path.join(self.dose_moving_path, "input_file.in")
         if os.path.exists(input_file_path):
             with open(input_file_path, "r") as infile:
                 input_content = infile.read()
@@ -119,17 +116,15 @@ class DoseGenerator:
         # Save dose DICOM
         try:
             construct_dose_dcm_mqi(
-                mq_dose_dir,
-                self.CT_object_moving.reference_dcm,
-                frame_of_reference_uid=self.CT_object_moving.frame_of_reference_UID
+                self.dose_moving_path,
+                self.CTobject.reference_dcm,
+                frame_of_reference_uid=self.CTobject.frame_of_reference_UID
             )
         except Exception as e:
             print(f"Error saving dose DICOM: {e}")
             raise
 
-        print(f"Dose image generated and saved to {mq_dose_dir}")
-
-
+        print(f"Dose image generated and saved to {self.dose_moving_path}")
 
 
     def make_data_dict(self):
@@ -189,73 +184,122 @@ class DoseGenerator:
 
 
     def new_transfer_param(self, rig_matrix):
+        # Ensure the matrix is a 1D array with 16 elements (flattened)
+        matrix = rig_matrix.copy()  # Copy the existing matrix (1D array)
 
-        trans_values={'x': self.row['pred_0'], 'y': self.row['pred_1'], 'z': self.row['pred_2']}
-        matrix = rig_matrix.copy()
+        print("************")
+        print(matrix)
+
+        # Define translation values
+        # trans_values = {'z': float(self.row['pred_0']), 'y': float(self.row['pred_1']), 'x': float(self.row['pred_2'])}
+        # trans_values = {'x': 0, 'y': 0, 'z': 0}
+        trans_values = {'z':(float(self.row['true_0']) - float (self.row['pred_0'])),
+                        'y':(float(self.row['true_1']) - float(self.row['pred_1'])),
+                        'x': (float(self.row['true_2']) - float(self.row['pred_2']))}
+
         final_translation_coordinate = {'x': 0, 'y': 0, 'z': 0}  # Initialize the dictionary
+        print(self.row['pred_0'], self.row['pred_1'], self.row['pred_2'])
+        
+        # Update the translation components at the corresponding indices in the 1D array
+        for idx, key in zip([3, 7, 11], ['x', 'y', 'z']):
+            # Modify the translation component (at indices 3, 7, 11)
+            matrix[idx] = (matrix[idx] * 10) + trans_values[key]  # Update translation in the flattened matrix
 
-        for idx, key in zip([3, 7, 11], ['x', 'y', 'z']): 
+            final_translation_coordinate[key] = trans_values[key]  # Store the translation value
 
-            matrix[idx] = (matrix[idx] + trans_values) * 10  # Make the new translation
-            final_translation_coordinate[key] = trans_values * 10  # Store the translation
+        # Convert the 1D array back to a 4x4 matrix before returning
+        matrix_ = matrix.reshape(4, 4)
 
-        return matrix, final_translation_coordinate
-
+        print(matrix_)
+        return matrix_, final_translation_coordinate
 
 
     def register_ct_struct(self):
         inf = self.data_dict[self.rct_part]
+        # print(self.data_dict)
+        # print(inf)
         # Load reference dose image
         ref_sitk = sitk.ReadImage(inf['dose_dir'])
 
         # Print dimensions before registration
         print(f"Before Registration: Reference image (dose) dimensions: {ref_sitk.GetSize()}")
-        for roi_name, mask in self.CT_object_moving.masks_structures.items():
+        for roi_name, mask in self.CTobject.masks_structures.items():
             print(f"Before Registration: Mask '{roi_name}' dimensions: {mask.shape}")
-
+        
+     
         # Check if registration data is available
-        if 'reg_dir' in inf:
+        if self.row['reg_dir']:
             with open(self.row['reg_dir']) as f:
                 reg_file = json.load(f)
 
 
             # Extract registration matrix and frame of reference UID
             registration_matrix = np.array(reg_file['examinations'][self.rct_part]['registration_to_planning_examinations']['A1PHH']['rigid_transformation_matrix'])
-            # print("Extracted registration matrix:", registration_matrix)
-            # registration_matrix = np.array(registration_matrix).reshape(4, 4)
-            # # Ensure the matrix is 4x4
-            # if registration_matrix.shape != (4, 4):
-            #     raise ValueError(f"Invalid transformation matrix shape: {registration_matrix.shape}, expected 4x4")
+
 
             frame_of_uid = reg_file['examinations'][self.rct_part]['equipment_info']['frame_of_reference']
 
             # Apply transformation and update the final dictionary
             new_matrix, final_translation_coordinate = self.new_transfer_param(registration_matrix)
-
+            
             # Apply transformation and resample the CT object
-            self.CT_object_moving.transform_and_resample(transformation_matrix=new_matrix, reference_sitk=ref_sitk, new_FoR_UID=frame_of_uid)
+            self.CTobject.transform_and_resample(transformation_matrix=new_matrix, reference_sitk=ref_sitk, new_FoR_UID=frame_of_uid)
 
             # Print dimensions after transformation and resampling
-            for roi_name, mask in self.CT_object_moving.masks_structures.items():
+            for roi_name, mask in self.CTobject.masks_structures.items():
                 print(f"After Resampling: Mask '{roi_name}' dimensions: {mask.shape}")
         else:
             print(f"No registration file found for {self.rct_part}, skipping registration.")
-            self.CT_object_moving.resample(reference_sitk=ref_sitk, square_slices=False)
+            self.CTobject.resample(reference_sitk=ref_sitk, square_slices=False)
 
             # Print dimensions after resampling (without transformation)
-            for roi_name, mask in self.CT_object_moving.masks_structures.items():
+            for roi_name, mask in self.CTobject.masks_structures.items():
                 print(f"After Resampling: Mask '{roi_name}' dimensions: {mask.shape}")
 
         # Apply overrides
-        self.CT_object_moving.override(self.externalROI_moving, self.overrideROIs_moving)
-        print(self.row)
+        self.CTobject.override(self.externalROI_moving, self.overrideROIs_moving)
 
         # Print final CT dimensions after override
-        print(f"After Override: CT image dimensions: {sitk.GetArrayFromImage(self.CT_object_moving.image).shape}")
+        print(f"After Override: CT image dimensions: {sitk.GetArrayFromImage(self.CTobject.image).shape}")
 
         # Save the updated CT object
-        self.CT_object_moving.save(self.dose_moving_path, save_struct_file=True)
-        shutil.copy2(inf['plan_dir'], self.dose_moving_path)
+        self.CTobject.save(self.ct_moving_path, save_struct_file=True)
+
+        shutil.copy2(inf['plan_dir'], self.ct_moving_path)
+
+
+
+    def make_nrrd(self):
+        dicom_file_path = os.path.join(self.dose_moving_path, 'RD-moqui.dcm')
+        nrrd_file_path = os.path.splitext(dicom_file_path)[0] + '.nrrd'
+        dicom_image = sitk.ReadImage(dicom_file_path)
+        sitk.WriteImage(dicom_image, nrrd_file_path)
+
+        self.row['pred_dose_moving'] = nrrd_file_path
+        print(f"File converted and saved as: {nrrd_file_path}")
+
+        # Ensure ct_moving_path exists and use it for the CT files
+        if hasattr(self, 'ct_moving_path'):
+            ct_file_names = sorted(glob.glob(os.path.join(self.ct_moving_path, 'CT*.dcm')))
+        else:
+            raise AttributeError("CT moving path not set.")
+
+        if not ct_file_names:
+            print("No CT DICOM files found.")
+            return
+
+        # Use SimpleITK to read the series of DICOM slices and create a 3D volume
+        reader = sitk.ImageSeriesReader()
+        reader.SetFileNames(ct_file_names)
+        ct_volume = reader.Execute()
+
+        # Save the CT volume as NRRD
+        ct_nrrd_file_path = os.path.join(self.ct_moving_path, 'CT_volume.nrrd')  # Ensure the correct directory
+        sitk.WriteImage(ct_volume, ct_nrrd_file_path)
+
+        self.row['pred_ct_moving'] = ct_nrrd_file_path
+        print(f"CT series converted and saved as: {ct_nrrd_file_path}")
+
 
 
     def construct_ct_obj(self, ct_struct_dirs):
@@ -270,44 +314,65 @@ class DoseGenerator:
 
         print(ct_struct_dirs['ct_dir'], ct_struct_dirs['struct_dir'], roi_names)
         # Construct the CT object only if valid DICOM files are present
-        CT_object = construct_CT_object('CT', ct_struct_dirs['ct_dir'], ct_struct_dirs['struct_dir'], roi_names = roi_names)
-        return CT_object, externalROI, overrideROIs
+        CTobject = construct_CT_object('CT', ct_struct_dirs['ct_dir'], ct_struct_dirs['struct_dir'], roi_names = roi_names)
+        return CTobject, externalROI, overrideROIs
     
-
 
 
     def process(self):
         try:
+            self.start_time = time.time()
+
             # Generate dose paths
             self.generate_dose_paths()
-            print("0000 done")
 
-            # Make the data dictionary
-            self.data_dict = self.make_data_dict()
-            print("1111 done")
-
-            # Generate CT objects
-            self.generate_ct_objects()
-            print("222 done")
-
-            # Register and adjust CT object
-            self.register_ct_struct()
-            print("333 done - registration finished")
-
-            # Run dose calculation
-            self.run_dose_calculation()
+            # Define dose and CT file paths
+            dose_file_path = os.path.join(self.dose_moving_path, 'RD-moqui.nrrd')
+            ct_file_path = os.path.join(self.dose_moving_path, 'CT_volume.nrrd')
             
-            print("Dose calculation finished: ", time.time() - self.start_time)
+            dose_exists = os.path.exists(dose_file_path)
+            ct_exists = os.path.exists(ct_file_path)
 
+            if dose_exists and ct_exists:
+                print(f"Dose and CT already exist at '{self.dose_moving_path}'. Reusing existing files.")
+                
+                # Update self.row with existing file paths
+                self.row['pred_dose_moving'] = dose_file_path
+                self.row['pred_ct_moving'] = ct_file_path
+
+                # Return the updated row without running dose generation
+                return self.row
+
+            else:
+                print("No existing dose or CT found. Proceeding with dose and CT generation.")
+                
+                # Generate the data dictionary
+                self.data_dict = self.make_data_dict()
+                print("Data dictionary generated.")
+
+                # Generate CT objects
+                self.generate_ct_objects()
+                print("CT objects generated.")
+
+                # Register and adjust CT object
+                self.register_ct_struct()
+                print("CT registration finished.")
+
+                # Run dose calculation
+                self.run_dose_calculation()
+
+                # Generate NRRD files (CT and dose)
+                self.make_nrrd()
+                print("Dose calculation and NRRD generation finished.")
+
+                # Update self.row with new file paths
+                self.row['pred_dose_moving'] = dose_file_path
+                self.row['pred_ct_moving'] = ct_file_path
 
         except Exception as e:
             print(f"Error in processing dose generation: {e}")
 
-
-import time
-
-
-
+        return self.row
 
 
 class OutlierDetector:

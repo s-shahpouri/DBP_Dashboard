@@ -65,7 +65,8 @@ with st.sidebar:
         # df_filtered_tagged_losses = main_df
         df_filtered_tagged_losses = main_df.iloc[:-1]
         df_avg = main_df.iloc[-1]
-        # print(df_avg.head())
+        # print("@@@@@")
+        # print(main_df.iloc[-1])
 
 
     elif selected_approach == "Single":
@@ -161,6 +162,10 @@ with st.sidebar:
 
         if not filtered_data.empty:
             outlier = filtered_data.iloc[0].to_dict()
+
+            dose_generator = DoseGenerator(filtered_data.iloc[0].to_dict())
+            updated_data_row = dose_generator.process()
+
             coord_html = display_coordination_info(outlier)
             st.markdown(coord_html, unsafe_allow_html=True)
         else:
@@ -202,10 +207,10 @@ with tab1:
 
 with tab2:
     if selected_approach == "Ensemble":
-        df_ensembled = read_from_pickle(df_avg[f'{mode}_output'])
-        print("&&&&&&&&&&&&&&&&")
-        print(df_avg.head())
+        # df_ensembled = read_from_pickle(df_avg[f'{mode}_output'])
+
         df_ensembled = read_from_pickle(df_avg[f'test_output'])
+
         # Create columns for the radio buttons to arrange them horizontally
         col1, col2, col3, col4, col5, col6, col7 , col8 = st.columns(8)
 
@@ -295,11 +300,15 @@ with tab3:
             available_colormaps = ['viridis', 'gray', 'binary', 'jet', ]
             selected_colormap = st.selectbox("Select Color Palette", available_colormaps)
 
-            # Define the scaling factor based on the selected image type
+
+            data = making_array(updated_data_row, selected_image_type)         
+            
             if selected_image_type == "CT":
-                scaling_factor = 100.0  # No scaling for CT
+                scaling_factor = 100.0  # Scale for CT iomages
                 filtered_data['fixed'] = filtered_data['fixed'].replace('/nrrd/', '/ct_nrrd/')
                 filtered_data['moving'] = filtered_data['moving'].replace('/nrrd/', '/ct_nrrd/')
+
+
             elif selected_image_type == "Dose":
                 scaling_factor = 1000.0  # Scale for Dose images
                 filtered_data['fixed'] = filtered_data['fixed'].replace('/ct_nrrd/', '/nrrd/')
@@ -307,12 +316,7 @@ with tab3:
 
 
 
-                print("******")
-                filtered_data_row = filtered_data.iloc[0].to_dict()  # Assuming you have one filtered data row as shown
-                dose_generator = DoseGenerator(filtered_data_row)
-                dose_generator.process()
 
-            data = making_array(filtered_data.iloc[0].to_dict(), selected_image_type)
             fixed_CT_array, _, _, _, _, _ = data
             max_slice_index  = fixed_CT_array.shape[0] - 1
             st.divider()
