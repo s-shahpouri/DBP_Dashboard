@@ -15,7 +15,11 @@ from Libs.resample_and_override_CT import get_structures_with_override
 import subprocess
 import glob
 import time
+import pydicom
 
+        # trans_values = {'z':(float(self.row['true_0']) - float (self.row['pred_0'])),
+        #                 'y':(float(self.row['true_1']) - float(self.row['pred_1'])),
+        #                 'x': (float(self.row['true_2']) - float(self.row['pred_2']))}
 
 
 class DoseGenerator:
@@ -55,6 +59,29 @@ class DoseGenerator:
         print(self.row)
 
 
+    def sort_dicom_by_instance_number(self, dicom_directory):
+        # Get all DICOM file paths in the directory
+        dicom_filenames = glob.glob(os.path.join(dicom_directory, 'CT*.dcm'))
+
+        # Read and sort DICOM files by the InstanceNumber tag
+        file_metadata = []
+        for filename in dicom_filenames:
+            try:
+                ds = pydicom.dcmread(filename)
+                instance_number = int(ds.InstanceNumber)
+                file_metadata.append((filename, instance_number))
+            except Exception as e:
+                print(f"Error reading {filename}: {e}")
+                continue
+
+        # Sort the files by InstanceNumber
+        sorted_files = sorted(file_metadata, key=lambda x: x[1])
+
+        # Return the sorted file paths
+        sorted_filenames = [file[0] for file in sorted_files]
+        return sorted_filenames
+    
+
     def generate_ct_objects(self):
         # Construct the data dictionary for patient and rCT
 
@@ -86,12 +113,6 @@ class DoseGenerator:
             GPUID=1, 
             particles_per_history=10000
         )
-
-        if self.CTobject is not None:
-            print(f"Attributes of CT Object Moving: {dir(self.CTobject)}")
-        else:
-            print("CT Object Moving is None")
-
 
         # Run MQI using the correct call and handle potential failures gracefully
         try:
@@ -184,34 +205,21 @@ class DoseGenerator:
 
 
     def new_transfer_param(self, rig_matrix):
-        # Ensure the matrix is a 1D array with 16 elements (flattened)
-        matrix = rig_matrix.copy()  # Copy the existing matrix (1D array)
 
-        print("************")
-        print(matrix)
+        true_matrix = rig_matrix.copy()  
+        pred_matrix = rig_matrix.copy() 
 
-        # Define translation values
-        # trans_values = {'z': float(self.row['pred_0']), 'y': float(self.row['pred_1']), 'x': float(self.row['pred_2'])}
-        # trans_values = {'x': 0, 'y': 0, 'z': 0}
-        trans_values = {'z':(float(self.row['true_0']) - float (self.row['pred_0'])),
-                        'y':(float(self.row['true_1']) - float(self.row['pred_1'])),
-                        'x': (float(self.row['true_2']) - float(self.row['pred_2']))}
+        pred_trans_values = {'z': float(self.row['pred_0']), 'y': float(self.row['pred_1']), 'x': float(self.row['pred_2'])}
+        true_trans_values = {'z': float(self.row['true_0']), 'y': float(self.row['true_1']), 'x': float(self.row['true_2'])}
 
-        final_translation_coordinate = {'x': 0, 'y': 0, 'z': 0}  # Initialize the dictionary
-        print(self.row['pred_0'], self.row['pred_1'], self.row['pred_2'])
-        
         # Update the translation components at the corresponding indices in the 1D array
         for idx, key in zip([3, 7, 11], ['x', 'y', 'z']):
             # Modify the translation component (at indices 3, 7, 11)
-            matrix[idx] = (matrix[idx] * 10) + trans_values[key]  # Update translation in the flattened matrix
+            true_matrix[idx] = (true_matrix[idx] * 10) + true_trans_values[key] 
+            pred_matrix[idx] = (pred_matrix[idx] * 10) + pred_trans_values[key]  
+               
+        return pred_matrix.reshape(4, 4)
 
-            final_translation_coordinate[key] = trans_values[key]  # Store the translation value
-
-        # Convert the 1D array back to a 4x4 matrix before returning
-        matrix_ = matrix.reshape(4, 4)
-
-        print(matrix_)
-        return matrix_, final_translation_coordinate
 
 
     def register_ct_struct(self):
@@ -240,7 +248,7 @@ class DoseGenerator:
             frame_of_uid = reg_file['examinations'][self.rct_part]['equipment_info']['frame_of_reference']
 
             # Apply transformation and update the final dictionary
-            new_matrix, final_translation_coordinate = self.new_transfer_param(registration_matrix)
+            new_matrix = self.new_transfer_param(registration_matrix)
             
             # Apply transformation and resample the CT object
             self.CTobject.transform_and_resample(transformation_matrix=new_matrix, reference_sitk=ref_sitk, new_FoR_UID=frame_of_uid)
@@ -280,26 +288,40 @@ class DoseGenerator:
 
         # Ensure ct_moving_path exists and use it for the CT files
         if hasattr(self, 'ct_moving_path'):
-            ct_file_names = sorted(glob.glob(os.path.join(self.ct_moving_path, 'CT*.dcm')))
+            # Sort the DICOM files by InstanceNumber
+            sorted_ct_file_names = self.sort_dicom_by_instance_number(self.ct_moving_path)
         else:
             raise AttributeError("CT moving path not set.")
 
-        if not ct_file_names:
+        if not sorted_ct_file_names:
             print("No CT DICOM files found.")
             return
+        
 
-        # Use SimpleITK to read the series of DICOM slices and create a 3D volume
+       # Use SimpleITK to read the sorted series of DICOM slices and create a 3D volume
         reader = sitk.ImageSeriesReader()
-        reader.SetFileNames(ct_file_names)
+        reader.SetFileNames(sorted_ct_file_names)
+        # Ensure DICOM orientation is respected
+        reader.MetaDataDictionaryArrayUpdateOn()
+        reader.LoadPrivateTagsOn()
+
         ct_volume = reader.Execute()
 
-        # Save the CT volume as NRRD
-        ct_nrrd_file_path = os.path.join(self.ct_moving_path, 'CT_volume.nrrd')  # Ensure the correct directory
-        sitk.WriteImage(ct_volume, ct_nrrd_file_path)
+        # # Save the CT volume as NRRD
+        # ct_nrrd_file_path = os.path.join(self.ct_moving_path, 'CT_volume.nrrd')  # Ensure the correct directory
+        # sitk.WriteImage(ct_volume, ct_nrrd_file_path)
 
+
+        # Flip the CT volume along the Z-axis to correct orientation
+        ct_volume_flipped = sitk.Flip(ct_volume, [False, False, True])  # Flip the Z-axis (third axis)
+
+        # Save the flipped CT volume as NRRD
+        ct_nrrd_file_path = os.path.join(self.ct_moving_path, 'CT_volume.nrrd')  # Ensure the correct directory
+        sitk.WriteImage(ct_volume_flipped, ct_nrrd_file_path)
+
+        
         self.row['pred_ct_moving'] = ct_nrrd_file_path
         print(f"CT series converted and saved as: {ct_nrrd_file_path}")
-
 
 
     def construct_ct_obj(self, ct_struct_dirs):
@@ -328,7 +350,7 @@ class DoseGenerator:
 
             # Define dose and CT file paths
             dose_file_path = os.path.join(self.dose_moving_path, 'RD-moqui.nrrd')
-            ct_file_path = os.path.join(self.dose_moving_path, 'CT_volume.nrrd')
+            ct_file_path = os.path.join(self.ct_moving_path, 'CT_volume.nrrd')
             
             dose_exists = os.path.exists(dose_file_path)
             ct_exists = os.path.exists(ct_file_path)
@@ -373,6 +395,7 @@ class DoseGenerator:
             print(f"Error in processing dose generation: {e}")
 
         return self.row
+
 
 
 class OutlierDetector:

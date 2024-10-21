@@ -1,6 +1,5 @@
 import numpy as np
 import streamlit as st
-import itk
 import pandas as pd
 import torch
 import plotly.graph_objs as go
@@ -364,6 +363,9 @@ def transform_moving_ct(moving_CT_image, fixed_CT_image, coordination, pixdim):
 
 
 
+
+
+
 def making_array(outlier, selected_image_type):
 
     if selected_image_type == "CT":
@@ -388,17 +390,23 @@ def making_array(outlier, selected_image_type):
     # Transform the moving image based on true coordinates
     transformed_moving_CT_array_true = transform_moving_ct(
                     moving_CT_image, fixed_CT_image, true_coords, pixdim)
-    # Transform the moving image based on predicted coordinates
-    transformed_moving_CT_array_pred = transform_moving_ct(
-                    pred_moving_CT_image, fixed_CT_image, pred_coords, pixdim)
+    # # Transform the moving image based on predicted coordinates
+    # transformed_moving_CT_array_pred = transform_moving_ct(
+    #                 pred_moving_CT_image, fixed_CT_image, pred_coords, pixdim)
 
     # Calculate the difference between the fixed image and transformed moving images (true and predicted coordinates)
     fixed_CT_array = sitk.GetArrayViewFromImage(fixed_CT_image).astype(int)
     moving_CT_array = sitk.GetArrayViewFromImage(moving_CT_image).astype(int)
+    pred_moving_CT_array = sitk.GetArrayViewFromImage(pred_moving_CT_image).astype(int)
+    
     difference_true = transformed_moving_CT_array_true - fixed_CT_array
-    difference_pred = transformed_moving_CT_array_pred - fixed_CT_array
+    # difference_pred = transformed_moving_CT_array_pred - fixed_CT_array
+    difference_pred = pred_moving_CT_array - fixed_CT_array
+    
 
-    return fixed_CT_array, moving_CT_array, transformed_moving_CT_array_true, difference_true, transformed_moving_CT_array_pred, difference_pred
+    return fixed_CT_array, moving_CT_array, transformed_moving_CT_array_true, difference_true, pred_moving_CT_array, difference_pred
+
+
 
 
 
@@ -541,6 +549,7 @@ def calculate_ensemble_average(dataset_option):
     # Check if any DataFrames were loaded
     if not df_list:
         return None
+    else:
         
         # Concatenate all DataFrames and compute the mean
         combined_df = pd.concat(df_list)
