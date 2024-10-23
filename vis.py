@@ -474,6 +474,69 @@ def plot_img(data, slice_index, colormap, scaling_factor):
     return plt
 
 
+import plotly.graph_objects as go
+import streamlit as st
+import numpy as np
+
+def plot_single_img(image_data, slice_index, colormap, scaling_factor):
+    # Create the heatmap for a single image with its own color bar
+    scaled_data = image_data[slice_index] / scaling_factor
+    fig = go.Figure(data=go.Heatmap(
+        z=scaled_data,
+        colorscale=colormap,
+        hovertemplate='x: %{x}<br>y: %{y}<br>value: %{z:.4f}<extra></extra>',  # Show values on hover
+        showscale=True,  # Display color bar
+        colorbar=dict(
+            len=1.0,  # Adjust color bar height
+            thickness=10,  # Thickness of the color bar
+            xpad=5,
+            title=f"x10^{int(np.log10(scaling_factor))}",  # Add the scaling factor on top of the color bar
+            titleside="top",  # Position the title at the top
+            titlefont=dict(size=10)  # Adjust font size of the title
+        )
+    ))
+
+    # Reverse the y-axis to fix the upside-down issue
+    fig.update_yaxes(autorange="reversed")
+
+    # Adjust the figure size to control both height and width
+    fig.update_layout(height=250, width=250, margin=dict(l=10, r=10, t=10, b=10))
+
+    return fig
+
+def plot_images_in_grid(data, slice_index, colormap, scaling_factor):
+    # Unpack the data for each image
+    fixed_array, moving_array, transformed_moving_array_true, difference_true, transformed_moving_array_pred, difference_pred = data
+    
+    # Create the grid layout: 3 rows, 2 columns each
+    row1 = st.columns([1,3,3,1])
+    row2 = st.columns([1,3,3,1])
+    row3 = st.columns([1,3,3,1])
+
+    # Plot the first 2 images in row 1
+    with row1[1]:
+        tile = st.container()
+        tile.plotly_chart(plot_single_img(fixed_array, slice_index, colormap, scaling_factor), use_container_width=True)
+    with row1[2]:
+        tile = st.container()
+        tile.plotly_chart(plot_single_img(moving_array, slice_index, colormap, scaling_factor), use_container_width=True)
+
+    # Plot the next 2 images in row 2
+    with row2[1]:
+        tile = st.container()
+        tile.plotly_chart(plot_single_img(transformed_moving_array_true, slice_index, colormap, scaling_factor), use_container_width=True)
+    with row2[2]:
+        tile = st.container()
+        tile.plotly_chart(plot_single_img(difference_true, slice_index, colormap, scaling_factor), use_container_width=True)
+
+    # Plot the last 2 images in row 3
+    with row3[1]:
+        tile = st.container()
+        tile.plotly_chart(plot_single_img(transformed_moving_array_pred, slice_index, colormap, scaling_factor), use_container_width=True)
+    with row3[2]:
+        tile = st.container()
+        tile.plotly_chart(plot_single_img(difference_pred, slice_index, colormap, scaling_factor), use_container_width=True)
+
 
 
 

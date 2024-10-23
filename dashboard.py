@@ -14,9 +14,18 @@ import numpy as np
 import seaborn as sns
 import matplotlib as mpl
 from assess import OutlierDetector, PathName, folder_approach, DoseGenerator
-from vis import calculate_ensemble_average, plot_ensemble_average_boxplots, plot_overview
+
+from vis import calculate_ensemble_average, plot_ensemble_average_boxplots, plot_overview, plot_images_in_grid
 from back_dash import BackDash
 import plotly.express as px
+import plotly.graph_objects as go
+import streamlit as st
+import numpy as np
+
+import plotly.graph_objects as go
+import streamlit as st
+import numpy as np
+
 
 
 
@@ -317,14 +326,21 @@ with tab3:
 
 
 
-            fixed_CT_array, _, _, _, _, _ = data
-            max_slice_index  = fixed_CT_array.shape[0] - 1
+            fixed_array, _, _, _, _, _ = data
+            max_slice_index  = fixed_array.shape[0] - 1
             st.divider()
             slice_index = st.slider("Select Slice Index", min_value=0, max_value=max_slice_index, value=max_slice_index // 2)
 
         with col3:
-            fig = plot_img(data, slice_index, colormap=selected_colormap, scaling_factor=scaling_factor)
-            st.pyplot(fig)
+            # fig = plot_img(data, slice_index, colormap=selected_colormap, scaling_factor=scaling_factor)
+            # st.pyplot(fig)
+            plot_images_in_grid(data, slice_index, selected_colormap, scaling_factor)
+            # # Call the function
+            # fig = plot_img_plotly(data, slice_index, selected_colormap, scaling_factor)
+            # st.plotly_chart(fig)  # Use st.plotly_chart to display Plotly figures
+
+            # plot_images_in_grid(data, slice_index, selected_colormap, scaling_factor)
+
     except:
         st.markdown("<p class='centered-lowered-text'>No data available to show.<br>Select an outlier!</p>", unsafe_allow_html=True)
 
@@ -401,3 +417,6 @@ with tab4:
 
     except:
         pass
+
+
+
