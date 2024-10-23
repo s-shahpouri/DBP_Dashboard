@@ -8,7 +8,6 @@ import json
 import re
 from monai.metrics import MAEMetric
 from io import StringIO
-from plotly.subplots import make_subplots
 from wordcloud import WordCloud
 import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
@@ -334,8 +333,7 @@ def plot_side_by_side(df1, df2, column_name, title1, title2):
     
 
 def transform_moving_ct(moving_CT_image, fixed_CT_image, coordination, pixdim):
-    if len(coordination) != 3:
-        raise ValueError(f"Expected coordination of length 3, but got {len(coordination)}")
+
 
     # Set the spacing for the images
     fixed_CT_image.SetSpacing(pixdim)
@@ -414,51 +412,40 @@ def making_array(outlier, selected_image_type):
     if selected_image_type == "CT":
         outlier['fixed'] = outlier['fixed'].replace('/nrrd/', '/ct_nrrd/')
         outlier['moving'] = outlier['moving'].replace('/nrrd/', '/ct_nrrd/')
-        fixed_CT_image = sitk.ReadImage(outlier['fixed']) 
-        moving_CT_image = sitk.ReadImage(outlier['moving'])
-        pred_moving_ct_image = sitk.ReadImage(outlier['ct_moving_pred'])
-        true_moving_ct_image = sitk.ReadImage(outlier['ct_moving_true'])
-
+        fixed_image = sitk.ReadImage(outlier['fixed']) 
+        moving_image = sitk.ReadImage(outlier['moving'])
+        pred_moving_image = sitk.ReadImage(outlier['ct_moving_pred'])
+        true_moving_image = sitk.ReadImage(outlier['ct_moving_true'])
+        print(f"pred_moving_ct_image: {outlier['ct_moving_pred']}")
+        print(f"true_moving_ct_image: {outlier['ct_moving_true']}")
        
 
     if selected_image_type == "Dose":
 
-        fixed_CT_image =sitk.ReadImage(outlier['fixed']) 
-        moving_CT_image = sitk.ReadImage(outlier['moving'])
-        pred_moving_ct_image = sitk.ReadImage(outlier['dose_moving_pred'])
-        true_moving_ct_image = sitk.ReadImage(outlier['dose_moving_true'])
-
-
-    # True and predicted coordinates from the outlier data
-    true_coords = [outlier['true_0'], outlier['true_1'], outlier['true_2']]
-    pred_coords = [outlier['pred_0'], outlier['pred_1'], outlier['pred_2']]
-    pixdim = fixed_CT_image.GetSpacing()  # Assuming the pixel dimensions are the same for both images
-
-    # # Transform the moving image based on true coordinates
-    # transformed_moving_CT_array_true = transform_moving_ct(
-    #                 moving_CT_image, fixed_CT_image, true_coords, pixdim)
-    # # Transform the moving image based on predicted coordinates
-    # transformed_moving_CT_array_pred = transform_moving_ct(
-    #                 pred_moving_CT_image, fixed_CT_image, pred_coords, pixdim)
+        fixed_image =sitk.ReadImage(outlier['fixed']) 
+        moving_image = sitk.ReadImage(outlier['moving'])
+        pred_moving_image = sitk.ReadImage(outlier['dose_moving_pred'])
+        true_moving_image = sitk.ReadImage(outlier['dose_moving_true'])
+        print(f"pred_moving_dose_image: {outlier['dose_moving_pred']}")
+        print(f"true_moving_dose_image: {outlier['dose_moving_true']}")
 
     # Calculate the difference between the fixed image and transformed moving images (true and predicted coordinates)
-    fixed_CT_array = sitk.GetArrayViewFromImage(fixed_CT_image).astype(int)
-    moving_CT_array = sitk.GetArrayViewFromImage(moving_CT_image).astype(int)
-    pred_moving_CT_array = sitk.GetArrayViewFromImage(pred_moving_ct_image).astype(int)
-    true_moving_CT_array = sitk.GetArrayViewFromImage(true_moving_ct_image).astype(int)
+    fixed_array = sitk.GetArrayViewFromImage(fixed_image).astype(int)
+    moving_array = sitk.GetArrayViewFromImage(moving_image).astype(int)
+    pred_moving_array = sitk.GetArrayViewFromImage(pred_moving_image).astype(int)
+    true_moving_array = sitk.GetArrayViewFromImage(true_moving_image).astype(int)
 
-
-    difference_true = true_moving_CT_array - fixed_CT_array
-    difference_pred = pred_moving_CT_array - fixed_CT_array
+    difference_true = true_moving_array - fixed_array
+    difference_pred = pred_moving_array - fixed_array
     
 
-    return fixed_CT_array, moving_CT_array, true_moving_CT_array, difference_true, pred_moving_CT_array, difference_pred
+    return fixed_array, moving_array, true_moving_array, difference_true, pred_moving_array, difference_pred
 
 
 
 def plot_img(data, slice_index, colormap, scaling_factor):
     
-    fixed_CT_array, moving_CT_array, transformed_moving_CT_array_true, difference_true, transformed_moving_CT_array_pred, difference_pred = data
+    fixed_array, moving_array, transformed_moving_array_true, difference_true, transformed_moving_array_pred, difference_pred = data
     plt.figure(figsize=(6, 5))
 
     def add_subplot_with_colorbar(index, data, title):
@@ -476,15 +463,18 @@ def plot_img(data, slice_index, colormap, scaling_factor):
         plt.tick_params(axis='both', which='minor', labelsize=4)
 
     # Add subplots with smaller titles and axis tick labels
-    add_subplot_with_colorbar(1, fixed_CT_array, 'Fixed Image')
-    add_subplot_with_colorbar(2, moving_CT_array, 'Moving Image')
-    add_subplot_with_colorbar(3, transformed_moving_CT_array_true, 'Transformed Moving (True)')
+    add_subplot_with_colorbar(1, fixed_array, 'Fixed Image')
+    add_subplot_with_colorbar(2, moving_array, 'Moving Image')
+    add_subplot_with_colorbar(3, transformed_moving_array_true, 'Transformed Moving (True)')
     add_subplot_with_colorbar(4, difference_true, 'Difference for (True coordination)')
-    add_subplot_with_colorbar(5, transformed_moving_CT_array_pred, 'Transformed Moving (Pred)')
+    add_subplot_with_colorbar(5, transformed_moving_array_pred, 'Transformed Moving (Pred)')
     add_subplot_with_colorbar(6, difference_pred, 'Difference for (Pred coordination)')
 
     plt.tight_layout()
     return plt
+
+
+
 
 
 def display_coordination_info(outlier):

@@ -32,7 +32,7 @@ st.markdown("<div class='centered-title' style='color:#04028b;'>DBP Dashboard</d
 # st.markdown('---')  # This adds a horizontal line
 
 # Call the function to load the CSS
-load_css("style.css")
+load_css("/data/sama/DBP_Dashboard/style.css")
 
 ensemble_data_path = 'df_best_esms.pkl'
 single_data_path = 'df_single.pkl'

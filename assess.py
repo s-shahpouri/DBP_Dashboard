@@ -213,18 +213,24 @@ class DoseGenerator:
 
     def new_transfer_param(self, rig_matrix):
 
-        true_matrix = rig_matrix.copy()  
+          
         pred_matrix = rig_matrix.copy() 
-
+        true_matrix = rig_matrix.copy()
+        
         pred_trans_values = {'z': float(self.row['pred_0']), 'y': float(self.row['pred_1']), 'x': float(self.row['pred_2'])}
         true_trans_values = {'z': float(self.row['true_0']), 'y': float(self.row['true_1']), 'x': float(self.row['true_2'])}
 
         # Update the translation components at the corresponding indices in the 1D array
         for idx, key in zip([3, 7, 11], ['x', 'y', 'z']):
             # Modify the translation component (at indices 3, 7, 11)
-            true_matrix[idx] = (true_matrix[idx] * 10) + true_trans_values[key] 
-            pred_matrix[idx] = (pred_matrix[idx] * 10) + pred_trans_values[key]  
+            pred_matrix[idx] = (pred_matrix[idx] * 10) + true_trans_values[key] - pred_trans_values[key]
+            true_matrix[idx] = (true_matrix[idx] * 10)  
                
+        print("####################")
+        print(rig_matrix)
+        print(true_trans_values)
+        print(true_matrix)
+        print("###############")
         return pred_matrix.reshape(4, 4), true_matrix.reshape(4, 4),
 
 
